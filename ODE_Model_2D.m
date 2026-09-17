@@ -144,6 +144,12 @@ legend('show', Location='best');
 hold off
 
 
+plot(state_total(:,3),state_total(:,1)/343);
+xlabel('height (m)');
+ylabel('speed (m/s)');
+
+
+
 %{
 % Events detect zero crossings, so check an already-low entry speed before
 % integrating. Keep one boundary sample for the existing phase bookkeeping.
