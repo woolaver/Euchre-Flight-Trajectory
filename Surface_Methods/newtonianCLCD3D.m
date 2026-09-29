@@ -39,7 +39,8 @@ function [CL, CD, CA, CN, CY, Cp, sinTheta] = newtonianCLCD3D(stlFile, alpha, Cp
 % area; sum over all faces and rotate by alpha into wind axes.
 
 TR = stlread(stlFile);
-V = TR.Points;
+%V = TR.Points./1000; %Use for HARV
+V = TR.Points; %Use for Bunny_Bomb
 F = TR.ConnectivityList;
 
 n = faceNormal(TR);              % Nf x 3, outward unit normals

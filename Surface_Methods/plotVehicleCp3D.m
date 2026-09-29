@@ -23,7 +23,8 @@ function plotVehicleCp3D(stlFile, Cp, showVectors, vectorScale)
 if nargin < 3 || isempty(showVectors), showVectors = false; end
 
 TR = stlread(stlFile);
-V = TR.Points;
+V = TR.Points; %Use for Bunny_Bomb
+%V = TR.Points./1000; %Use for HARV
 F = TR.ConnectivityList;
 
 figure('Name', '3D vehicle surface Cp');
