@@ -16,7 +16,7 @@ function [value, isterminal, direction] = ground(t, state)
 end
 
 function [value, isterminal, direction] = dive(t, state)
-    value = state(3) - 7000;
+    value = state(3) - 10000;
     isterminal = 1;
     direction = -1;
 end
@@ -54,7 +54,6 @@ options_climb = odeset(solver_options, 'Events', @cruise_start);
 
 [t_climb, state_climb, te_climb] = ode45(@ODE_climb, time_range_climb, state_0_climb, options_climb);
 
-disp('leon gay')
 if isempty(te_climb)
     error('Climb never reached the apex before time limit.');
 end
@@ -65,27 +64,20 @@ options_cruise = odeset(solver_options, 'Events', @hold_speed);
 
 [t_cruise, state_cruise, te_cruise] = ode45(@ODE_cruise, time_range_cruise, state_0_cruise, options_cruise);
 
-disp('leon very gay')
-
 if isempty(te_cruise)
     error('Cruise never reached the 7000 m hold speed altitude.');
 end
 
 state_0_hold = state_cruise(end, :);
-state_0_hold(2) = deg2rad(-90);
 time_range_hold = [t_cruise(end), t_cruise(end) + 240];
 options_hold = odeset(solver_options, 'Events', @dive);
 [t_hold, state_hold, te_hold] = ode45(@ODE_hold_velocity, time_range_hold, state_0_hold, options_hold);
-
-disp('leon mucho gayo')
 
 state_0_dive = state_hold(end, :);
 state_0_dive(2) = deg2rad(-90);
 time_range_dive = [t_hold(end), t_hold(end) + 240];
 options_dive = odeset(solver_options, 'Events', @ground);
 [t_dive, state_dive, te_dive] = ode45(@ODE_dive, time_range_dive, state_0_dive, options_dive);
-
-disp('adam gay?')
 
 t_total = [t_climb; t_cruise(2:end); t_hold(2:end); t_dive(2:end)];
 state_total = [state_climb; state_cruise(2:end,:); ...
