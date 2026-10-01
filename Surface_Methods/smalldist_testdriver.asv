@@ -1,0 +1,13 @@
+%test driver for small dist theory
+minf = 3.5;
+alpha = deg2rad(2);
+sref_lift = 1;
+sref_drag = 1;
+y = 1.4;
+stlfile = 'Bunny_Bomb - Revolve2.stl';
+showVectors = false;
+
+
+[CL, CD, CA, CN, CY, Cp, theta] = smalldist_supersonic(stlfile, alpha, minf, sref_lift, sref_drag,y);
+fprin
+plotVehicleCp3D(stlfile, Cp, showVectors, [])
