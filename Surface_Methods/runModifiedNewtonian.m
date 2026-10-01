@@ -20,7 +20,8 @@ p_pinf = (((gamma+1)^2*M_inf^2)/((4*gamma*M_inf^2) - 2*(gamma - 1)))^(gamma/(gam
 Cp_max = 2/(gamma*M_inf^2)*(p_pinf - 1);
 
 %for cruise take bottom surface from CAD file
-S_ref = .47;
+S_ref = .029; %For HARV
+%S_ref = .47; %For Bunny_bomb
 
 [CL, CD, CA, CN, CY, Cp_vec, sinTheta] = newtonianCLCD3D(geometry, alpha, Cp_max, S_ref);
 
