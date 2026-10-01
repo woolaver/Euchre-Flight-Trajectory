@@ -1,4 +1,4 @@
-function plotVehicleCp3D(stlFile, Cp, showVectors, vectorScale)
+function plotVehicleCp3D(stlFile, Cp, theta, showVectors, vectorScale)
 % PLOTVEHICLECP3D Plot the full 3D STL surface colored by Cp, with an
 % optional overlay of Cp*normal vectors (magnitude = Cp, direction =
 % outward normal) at a decimated set of face centroids.
@@ -32,6 +32,19 @@ patch('Faces', F, 'Vertices', V, 'FaceVertexCData', Cp, ...
 colormap(jet);
 cb = colorbar;
 cb.Label.String = 'C_p';
+axis equal; view(3); grid on;
+xlabel('x'); ylabel('y'); zlabel('z');
+title('Cp distribution');
+
+
+%this is to see theta at each point
+
+figure('Name', '3D vehicle surface Theta');
+patch('Faces', F, 'Vertices', V, 'FaceVertexCData', (theta), ...
+    'FaceColor', 'flat', 'EdgeColor', 'none');
+colormap(jet);
+cb = colorbar;
+cb.Label.String = 'Theta';
 axis equal; view(3); grid on;
 xlabel('x'); ylabel('y'); zlabel('z');
 title('3D Newtonian Cp distribution');

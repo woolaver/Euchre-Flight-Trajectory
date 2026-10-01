@@ -52,6 +52,8 @@ dA = sqrt(sum(areaVec.^2, 2));   % Nf x 1, true triangle areas
 %thats what trevor did for some reason
 Vinf = [0, -sin(alpha), cos(alpha)];
 
+
+
 sinTheta = n * Vinf';             % Nf x 1
 Cp = zeros(size(sinTheta));
 windward = sinTheta > 0;

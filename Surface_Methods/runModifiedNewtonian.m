@@ -26,4 +26,4 @@ S_ref = .47;
 
 angles = rad2deg(sinTheta);
 
-plotVehicleCp3D(geometry, Cp_vec, false)
+plotVehicleCp3D(geometry, Cp_vec,sinTheta , false,[])
