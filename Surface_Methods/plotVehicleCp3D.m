@@ -47,7 +47,7 @@ cb = colorbar;
 cb.Label.String = 'Theta';
 axis equal; view(3); grid on;
 xlabel('x'); ylabel('y'); zlabel('z');
-title('3D Newtonian Cp distribution');
+title('Theta');
 
 if showVectors
     n = faceNormal(TR);

@@ -1,4 +1,4 @@
-function [CL, CD, CA, CN, CY, Cp, sinTheta] = newtonianCLCD3D(stlFile, alpha, CpMax, Sref)
+function [CL, CD, CA, CN, CY, Cp, sinTheta] = newtonianCLCD3D(stlFile, alpha,minf, Sref,gamma)
 % NEWTONIANCLCD3D Modified Newtonian Theory over a full 3D STL mesh (no
 % planar slicing -- every triangle in the mesh contributes).
 %
@@ -56,6 +56,12 @@ Vinf = [0, -sin(alpha), cos(alpha)];
 
 sinTheta = n * Vinf';             % Nf x 1
 Cp = zeros(size(sinTheta));
+
+
+p_pinf = (((gamma+1)^2*minf^2)/((4*gamma*minf^2) - 2*(gamma - 1)))^(gamma/(gamma-1))*((1-gamma+(2*gamma*minf^2))/(gamma+1)); 
+CpMax = 2/(gamma*minf^2)*(p_pinf - 1);
+
+
 windward = sinTheta > 0;
 Cp(windward) = CpMax * sinTheta(windward).^2;
 
