@@ -8,7 +8,8 @@ close all
 %Geometry to import, must be .stl file
 %geometry = 'Bunny_Bomb - Revolve2.stl';
 %geometry = 'HARV.STL';  %NOTE if using HARV you have to divide points
-geometry = 'Ice_Cream_Cone_STL.STL';
+%geometry = 'Ice_Cream_Cone_STL.STL';
+geometry = 'Virginia.stl';
 
 %helper function to ensure .stl file is correct
 %plotSTLRaw(geometry, true)
@@ -28,7 +29,8 @@ for i = 1:100
         
         %for cruise take bottom surface from CAD file
         %S_ref = .029; %For HARV
-        S_ref = .049; %For Bunny_bomb
+        %S_ref = .049; %For Bunny_bomb
+        S_ref = (.2^2)*pi;
         
         [CL, CD, CA, CN, CY, Cp_vec, sinTheta] = newtonianCLCD3D(geometry, alpha(j), Cp_max, S_ref);
         CL_vec(i, j) = CL;
@@ -36,8 +38,8 @@ for i = 1:100
     end
 end
 
-datafile_CL = "Ice_Cream_Cone_CL.csv";
+datafile_CL = "Virginia_CL.csv";
 writematrix(CL_vec, datafile_CL)
 
-datafile_CD = "Ice_Cream_Cone_CD.csv";
+datafile_CD = "Virginia_CD.csv";
 writematrix(CD_vec, datafile_CD)

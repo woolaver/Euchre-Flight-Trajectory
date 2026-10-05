@@ -7,13 +7,14 @@ close all
 %Geometry to import, must be .stl file
 %geometry = 'Bunny_Bomb - Revolve2.stl';
 %geometry = 'HARV.STL';  %NOTE if using HARV you have to divide points
-geometry = 'Ice_Cream_Cone_STL.STL';
+%geometry = 'Ice_Cream_Cone_STL.STL';
+geometry = 'Virginia.stl';
 
 %helper function to ensure .stl file is correct
 %plotSTLRaw(geometry, true)
 
 M_inf = 8;
-alpha = deg2rad(50);
+alpha = deg2rad(30);
 
 gamma = 1.4;
 
