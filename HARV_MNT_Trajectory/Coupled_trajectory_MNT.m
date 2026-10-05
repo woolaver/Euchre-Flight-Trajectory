@@ -42,13 +42,13 @@ function [value, isterminal, direction] = hold_speed(t, state)
 end
 
 Mach_init = 8;
-launch_angle = deg2rad(28);
+launch_angle = deg2rad(20);
 init_height = 1;
 [~, a, ~, ~] = atmoscoesa(init_height); %m/s
 V0 = Mach_init*a;
 
 state_0_climb= [V0; launch_angle; init_height; 0];
-time_range_climb = [0 200];
+time_range_climb = [0 500];
 solver_options = odeset('RelTol', 1e-7, 'AbsTol', [1e-6 1e-9 1e-5 1e-5], 'MaxStep', 1);
 options_climb = odeset(solver_options, 'Events', @cruise_start);
 
@@ -63,7 +63,7 @@ end
 disp("climb end")
 
 state_0_cruise = state_climb(end, :);
-time_range_cruise = [t_climb(end), t_climb(end) + 240];
+time_range_cruise = [t_climb(end), t_climb(end) + 500];
 options_cruise = odeset(solver_options, 'Events', @hold_speed);
 
 [t_cruise, state_cruise, te_cruise] = ode45(@ODE_cruise_mnt, time_range_cruise, state_0_cruise, options_cruise);
@@ -75,32 +75,31 @@ end
 disp("cruise end")
 
 state_0_hold = state_cruise(end, :);
-time_range_hold = [t_cruise(end), t_cruise(end) + 240];
-options_hold = odeset(solver_options, 'Events', @dive);
+time_range_hold = [t_cruise(end), t_cruise(end) + 500];
+options_hold = odeset(solver_options, 'Events', @ground);
 [t_hold, state_hold, te_hold] = ode45( ...
     @ODE_hold_velocity_mnt, time_range_hold, state_0_hold, options_hold);
 
 disp("hold velocity end")
 
+
+%{
 state_0_dive = state_hold(end, :);
 state_0_dive(2) = deg2rad(-90);
-time_range_dive = [t_hold(end), t_hold(end) + 240];
+time_range_dive = [t_hold(end), t_hold(end) + 500];
 options_dive = odeset(solver_options, 'Events', @ground);
 [t_dive, state_dive, te_dive] = ode45(@ODE_dive_mnt, time_range_dive, state_0_dive, options_dive);
 
 disp("dive end")
+%}
 
-t_total = [t_climb; t_cruise(2:end); t_hold(2:end); t_dive(2:end)];
-state_total = [state_climb; state_cruise(2:end,:); state_hold(2:end,:); state_dive(2:end,:)];
+t_total = [t_climb; t_cruise(2:end); t_hold(2:end, :)];
+state_total = [state_climb; state_cruise(2:end,:); state_hold(2:end, :)];
 
-phase_names = {'Climb', 'Cruise', 'Hold', 'Dive'};
-phase_times = {t_climb, t_cruise, t_hold, t_dive};
-phase_states = {state_climb, state_cruise, state_hold, state_dive};
-if ~isempty(t_dive)
-    phase_names{end+1} = 'Dive';
-    phase_times{end+1} = t_dive;
-    phase_states{end+1} = state_dive;
-end
+phase_names = {'Climb', 'Cruise', 'Hold'};
+phase_times = {t_climb, t_cruise, t_hold};
+phase_states = {state_climb, state_cruise, state_hold};
+
 fprintf('Phase end:        t (s)      V (m/s)   gamma (deg)      h (m)        x (m)\n');
 for k = 1:numel(phase_names)
     last = phase_states{k}(end,:);
@@ -140,3 +139,12 @@ ylabel('Height (m)');
 title('Trajectory Simulation');
 legend('show', Location='best');
 hold off
+
+disp("Max Height: " + max(state_total(:, 3)) + " m")
+disp("Final Range: " + state_total(end, 4) + " m")
+disp("Total Time: " + t_total(end) + " s")
+disp("Mach Number at Impact: " + state_total(end, 1)/a)
+
+csv_file = [t_total'; state_total'];
+
+writematrix(csv_file, "justin_shit_at_hockey.csv")

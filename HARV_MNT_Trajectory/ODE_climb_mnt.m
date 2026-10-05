@@ -12,18 +12,24 @@ function state_dot = ODE_climb_mnt(time, state)
     g = 9.8; %m/s^2
     
     [~, a, ~, rho] = atmoscoesa(state(3));
-    gamma = 1.4;
     Mach = state(1)/a;
-    Cp_max = (2/(gamma*Mach^2))*((((gamma+1)/2)*Mach^2)^((gamma)/(gamma-1))*((gamma + 1)/(2*gamma*Mach^2 - (gamma - 1)))^(1/(gamma-1))-1);
 
     %for now assuming constant alpha = 0, will look into changing at later
     %date
     alpha = 0;
 
-    geometry = "../Surface_Methods/Bunny_Bomb - Revolve2.stl";
-    S_ref = .47; 
+    S_ref = (.2^2)*pi; 
 
-    [CL, CD, ~, ~, ~, ~, ~] = newtonianCLCD3D(geometry, alpha, Cp_max, S_ref);
+    %alpha_vec and Mach_vec must be same as the ones used to create CL_vec
+    %and CD_vec
+    alpha_vec = deg2rad(linspace(-30, 30, 100));
+    Mach_vec = linspace(2, 8, 100);
+
+    CL_vec = readmatrix("HARV_CL.csv");
+    CD_vec = readmatrix("HARV_CD.csv");
+
+    CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear');
+    CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear');
 
     D = 1/2*rho*state(1)^2*S_ref*CD;
     L = 1/2*rho*state(1)^2*S_ref*CL;

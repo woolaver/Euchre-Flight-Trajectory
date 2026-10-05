@@ -135,6 +135,11 @@ title('Trajectory Simulation');
 legend('show', Location='best');
 hold off
 
+%write final state vector to a csv file
+
+csv_file = [t_total'; state_total'];
+
+writematrix(csv_file, "justin_sucks_cock.csv")
 
 %{
 % Events detect zero crossings, so check an already-low entry speed before
