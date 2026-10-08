@@ -10,8 +10,6 @@ function state_dot = ODE_climb_mnt(time, state)
     %other ODE's for cruise and for descent
     m = 120; %kg
     g = 9.8; %m/s^2
-
-    disp(time)
     
     [~, a, ~, rho] = atmoscoesa(state(3));
     Mach = state(1)/a;
@@ -35,6 +33,9 @@ function state_dot = ODE_climb_mnt(time, state)
 
     D = 1/2*rho*state(1)^2*S_ref*CD;
     L = 1/2*rho*state(1)^2*S_ref*CL;
+
+    V_dot = -D/m - g*sin(state(2))
+    gamma_dot = L/(m*state(1)) - (g/state(1))*cos(state(2))
     
     state_dot = [-D/m - g*sin(state(2));
                  L/(m*state(1)) - (g/state(1))*cos(state(2));

@@ -42,14 +42,14 @@ function [value, isterminal, direction] = hold_speed(t, state)
 end
 
 Mach_init = 8;
-launch_angle = deg2rad(15);
+launch_angle = deg2rad(20);
 init_height = 1;
 [~, a, ~, ~] = atmoscoesa(init_height); %m/s
 V0 = Mach_init*a;
 
 state_0_climb= [V0; launch_angle; init_height; 0];
 time_range_climb = [0 500];
-solver_options = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'MaxStep', 1);
+solver_options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9, 'MaxStep', 1);
 options_climb = odeset(solver_options, 'Events', @cruise_start);
 
 disp("before climb")
@@ -74,6 +74,7 @@ end
 
 disp("cruise end")
 
+%{
 state_0_hold = state_cruise(end, :);
 time_range_hold = [t_cruise(end), t_cruise(end) + 500];
 options_hold = odeset(solver_options, 'Events', @ground);
@@ -82,6 +83,7 @@ options_hold = odeset(solver_options, 'Events', @ground);
 
 disp("hold velocity end")
 
+%}
 
 %{
 state_0_dive = state_hold(end, :);
@@ -93,12 +95,12 @@ options_dive = odeset(solver_options, 'Events', @ground);
 disp("dive end")
 %}
 
-t_total = [t_climb; t_cruise(2:end); t_hold(2:end, :)];
-state_total = [state_climb; state_cruise(2:end,:); state_hold(2:end, :)];
+t_total = [t_climb; t_cruise(2:end)];
+state_total = [state_climb; state_cruise(2:end,:)];
 
-phase_names = {'Climb', 'Cruise', 'Hold'};
-phase_times = {t_climb, t_cruise, t_hold};
-phase_states = {state_climb, state_cruise, state_hold};
+phase_names = {'Climb', 'Cruise'};
+phase_times = {t_climb, t_cruise};
+phase_states = {state_climb, state_cruise};
 
 fprintf('Phase end:        t (s)      V (m/s)   gamma (deg)      h (m)        x (m)\n');
 for k = 1:numel(phase_names)
@@ -163,7 +165,7 @@ plot(t_cruise(end), rad2deg(alpha(index_cruise_end)), 'o', 'LineWidth', 2)
 plot(t_hold(end), rad2deg(alpha(index_hold_end)), 'o', 'LineWidth', 2)
 xlabel('Time (s)')
 ylabel("\alpha (deg)")
-legend('Angle of Attack', 'Climb End', 'Cruise End', 'Hold End')
+legend('Angle of Attack', 'Climb End', 'Cruise End')
 title('Angle of Attack vs. Time')
 hold off
 
@@ -175,7 +177,7 @@ plot(t_cruise(end), Mach(index_cruise_end), 'o', 'LineWidth', 2)
 plot(t_hold(end), Mach(index_hold_end), 'o', 'LineWidth', 2)
 xlabel('Time (s)')
 ylabel("Mach Number")
-legend('Mach Number', 'Climb End', 'Cruise End', 'Hold End')
+legend('Mach Number', 'Climb End', 'Cruise End')
 title('Mach Number vs. Time')
 hold off
 
@@ -187,7 +189,7 @@ plot(t_cruise(end), CL(index_cruise_end), 'o', 'LineWidth', 2)
 plot(t_hold(end), CL(index_hold_end), 'o', 'LineWidth', 2)
 xlabel('Time (s)')
 ylabel("CL")
-legend('CL', 'Climb End', 'Cruise End', 'Hold End')
+legend('CL', 'Climb End', 'Cruise End')
 title('CL vs. Time')
 hold off
 
@@ -199,6 +201,6 @@ plot(t_cruise(end), CD(index_cruise_end), 'o', 'LineWidth', 2)
 plot(t_hold(end), CD(index_hold_end), 'o', 'LineWidth', 2)
 xlabel('Time (s)')
 ylabel("CD")
-legend('CD', 'Climb End', 'Cruise End', 'Hold End')
+legend('CD', 'Climb End', 'Cruise End')
 title('CD vs. Time')
 hold off

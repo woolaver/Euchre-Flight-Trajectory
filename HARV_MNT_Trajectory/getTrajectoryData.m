@@ -14,8 +14,8 @@ function [alpha, Mach, CL, CD] = getTrajectoryData(trajectoryFile, climb_end, cr
     alpha_vec = deg2rad(linspace(-30, 30, 100));
     Mach_vec = linspace(2, 8, 100);
 
-    CL_vec = readmatrix("HARV_CL.csv");
-    CD_vec = readmatrix("HARV_CD.csv");
+    CL_vec = readmatrix("HARV_CL_50_500.csv");
+    CD_vec = readmatrix("HARV_CD_50_500.csv");
 
     m = 120; %kg
     g = 9.8; %m/s^2
