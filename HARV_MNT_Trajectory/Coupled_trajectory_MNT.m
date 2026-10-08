@@ -151,6 +151,9 @@ writematrix(csv_file, "HARV_MNT_Trajectory.csv")
 
 [alpha, Mach, CL, CD] = getTrajectoryData("HARV_MNT_Trajectory.csv", t_climb(end), t_cruise(end));
 
+heatingTraj = [csv_file; alpha'];
+writematric(heatingTraj, "Heating Trajectory.csv")
+
 index_climb_end = length(t_climb);
 index_cruise_end = length(t_cruise) + index_climb_end - 1;
 index_hold_end = length(t_hold) + index_cruise_end - 1;
