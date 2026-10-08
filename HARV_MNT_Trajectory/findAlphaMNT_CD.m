@@ -1,14 +1,14 @@
-function alpha_required = findAlphaMNT(CD_req, Mach)
+function alpha_required = findAlphaMNT_CD(CD_req, Mach)
     %Finds the optimal alpha for best L/D for modified newtonian theory
         
     N = 100;
     alpha = deg2rad(linspace(-30, 30, N));
     tol = 1e-2;
 
-    Mach_vec = linspace(2, 8, 100);
-    alpha_vec = deg2rad(linspace(-30, 30, 100));
+    Mach_vec = linspace(2, 8, 50);
+    alpha_vec = deg2rad(linspace(-30, 30, 500));
 
-    CD_vec = readmatrix("HARV_CD.csv");
+    CD_vec = readmatrix("HARV_CD_50_500.csv");
 
     alpha_best = optimalAlphaMNT(Mach);
 

@@ -5,16 +5,17 @@ function state_dot = ODE_hold_velocity_mnt(time, state)
     [~, a, ~, rho] = atmoscoesa(state(3));
     Mach = state(1)/a;
    
+    disp(state(3))
 
     S_ref = (.2^2)*pi; 
 
     %alpha_vec and Mach_vec must be same as the ones used to create CL_vec
     %and CD_vec
-    alpha_vec = deg2rad(linspace(-30, 30, 100));
-    Mach_vec = linspace(2, 8, 100);
+    alpha_vec = deg2rad(linspace(-30, 30, 500));
+    Mach_vec = linspace(2, 8, 50);
 
-    CL_vec = readmatrix("HARV_CL.csv");
-    CD_vec = readmatrix("HARV_CD.csv");
+    CL_vec = readmatrix("HARV_CL_50_500.csv");
+    CD_vec = readmatrix("HARV_CD_50_500.csv");
 
     % CD required to make V_dot = 0
     CD_req = -2*m*g*sin(state(2))/(rho*state(1)^2*S_ref);
@@ -41,7 +42,7 @@ end
     if(state(3) < 27500)
         if CD_req >= CD_min
             % Constant velocity is physically achievable
-            alpha = findAlphaMNT(CD_req, Mach);
+            alpha = findAlphaMNT_CD(CD_req, Mach);
         end
     else
         alpha = deg2rad(-3);

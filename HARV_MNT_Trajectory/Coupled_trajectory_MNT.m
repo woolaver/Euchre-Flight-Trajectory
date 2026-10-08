@@ -42,14 +42,14 @@ function [value, isterminal, direction] = hold_speed(t, state)
 end
 
 Mach_init = 8;
-launch_angle = deg2rad(20);
+launch_angle = deg2rad(15);
 init_height = 1;
 [~, a, ~, ~] = atmoscoesa(init_height); %m/s
 V0 = Mach_init*a;
 
 state_0_climb= [V0; launch_angle; init_height; 0];
 time_range_climb = [0 500];
-solver_options = odeset('RelTol', 1e-7, 'AbsTol', [1e-6 1e-9 1e-5 1e-5], 'MaxStep', 1);
+solver_options = odeset('RelTol', 1e-6, 'AbsTol', 1e-8, 'MaxStep', 1);
 options_climb = odeset(solver_options, 'Events', @cruise_start);
 
 disp("before climb")
@@ -147,4 +147,58 @@ disp("Mach Number at Impact: " + state_total(end, 1)/a)
 
 csv_file = [t_total'; state_total'];
 
-writematrix(csv_file, "justin_shit_at_hockey.csv")
+writematrix(csv_file, "HARV_MNT_Trajectory.csv")
+
+[alpha, Mach, CL, CD] = getTrajectoryData("HARV_MNT_Trajectory.csv", t_climb(end), t_cruise(end));
+
+index_climb_end = length(t_climb);
+index_cruise_end = length(t_cruise) + index_climb_end - 1;
+index_hold_end = length(t_hold) + index_cruise_end - 1;
+
+figure()
+hold on
+plot(t_total, rad2deg(alpha), 'LineWidth', 1, 'Color', 'Blue')
+plot(t_climb(end), rad2deg(alpha(index_climb_end)), 'o', 'LineWidth', 2)
+plot(t_cruise(end), rad2deg(alpha(index_cruise_end)), 'o', 'LineWidth', 2)
+plot(t_hold(end), rad2deg(alpha(index_hold_end)), 'o', 'LineWidth', 2)
+xlabel('Time (s)')
+ylabel("\alpha (deg)")
+legend('Angle of Attack', 'Climb End', 'Cruise End', 'Hold End')
+title('Angle of Attack vs. Time')
+hold off
+
+figure()
+hold on
+plot(t_total, Mach, 'LineWidth', 1, 'Color', 'Blue')
+plot(t_climb(end), Mach(index_climb_end), 'o', 'LineWidth', 2)
+plot(t_cruise(end), Mach(index_cruise_end), 'o', 'LineWidth', 2)
+plot(t_hold(end), Mach(index_hold_end), 'o', 'LineWidth', 2)
+xlabel('Time (s)')
+ylabel("Mach Number")
+legend('Mach Number', 'Climb End', 'Cruise End', 'Hold End')
+title('Mach Number vs. Time')
+hold off
+
+figure()
+hold on
+plot(t_total, CL, 'LineWidth', 1, 'Color', 'Blue')
+plot(t_climb(end), CL(index_climb_end), 'o', 'LineWidth', 2)
+plot(t_cruise(end), CL(index_cruise_end), 'o', 'LineWidth', 2)
+plot(t_hold(end), CL(index_hold_end), 'o', 'LineWidth', 2)
+xlabel('Time (s)')
+ylabel("CL")
+legend('CL', 'Climb End', 'Cruise End', 'Hold End')
+title('CL vs. Time')
+hold off
+
+figure()
+hold on
+plot(t_total, CD, 'LineWidth', 1, 'Color', 'Blue')
+plot(t_climb(end), CD(index_climb_end), 'o', 'LineWidth', 2)
+plot(t_cruise(end), CD(index_cruise_end), 'o', 'LineWidth', 2)
+plot(t_hold(end), CD(index_hold_end), 'o', 'LineWidth', 2)
+xlabel('Time (s)')
+ylabel("CD")
+legend('CD', 'Climb End', 'Cruise End', 'Hold End')
+title('CD vs. Time')
+hold off
