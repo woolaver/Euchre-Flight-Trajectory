@@ -1,4 +1,4 @@
-function [CL, CD, CA, CN, CY, Cp, theta] = smalldist_supersonic(stlFile, alpha, minf, sref_lift, sref_drag,y)
+function [CL, CD, Cx, Cz, Cy, Cp, theta, centroid, x_cp] = smalldist_supersonic(stlFile, alpha, minf, sref_lift, sref_drag,y)
 %The aim of this script is to make a low fidelity solver for supersonic 
 %will miss blunt edges correct later
 TR = stlread(stlFile);
@@ -12,6 +12,13 @@ v2 = V(F(:,2),:);
 v3 = V(F(:,3),:);
 areaVec = 0.5 * cross(v2 - v1, v3 - v1, 2);
 dA = sqrt(sum(areaVec.^2, 2));   % Nf x 1, true triangle areas
+
+%get center point coordinate for each panel
+%get center point coordinate for each panel
+centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
+
+
+
 
 % Vinf = [cos(alpha), 0, sin(alpha)]; % 1x3 da vector for velocity
 vinf = [0, -sin(alpha), cos(alpha)];
@@ -35,11 +42,20 @@ Cp = max(min(Cp, Cp_max), Cp_min);   % going through and min maxing the cp point
 dF = -Cp .* n .* dA;              % Nf x 3, force contribution per face
 Ftotal = sum(dF, 1);              % 1 x 3
 
-CA = Ftotal(3) / sref_drag;  %forces in x direction, nose to tail should be 1
-CY = Ftotal(1) / sref_drag;      %forces in y drection, out wing,  shouldnt need this should be 2
-CN = Ftotal(2) / sref_lift;    %forces in z, up should be 3 but bunny bomb is cooked
 
-CL = CN*cos(alpha) - CA*sin(alpha);
-CD = CN*sin(alpha) + CA*cos(alpha);
+%solvng for center of pressure
+%multiply df for cz by x, divide by total length
+x_axial = centroid(:,3);
+x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
+x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
+
+Cx = Ftotal(3) / sref_drag;  %forces in x direction, nose to tail should be 1
+Cy = Ftotal(1) / sref_drag;      %forces in y drection, out wing,  shouldnt need this should be 2
+Cz = Ftotal(2) / sref_lift;    %forces in z, up should be 3 but bunny bomb is cooked
+
+
+
+CL = Cz*cos(alpha) - Cx*sin(alpha);
+CD = Cz*sin(alpha) + Cx*cos(alpha);
 
 end

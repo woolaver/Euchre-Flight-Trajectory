@@ -22,7 +22,7 @@ Cp_max = 2/(gamma*M_inf^2)*(p_pinf - 1);
 %for cruise take bottom surface from CAD file
 S_ref = .47;
 
-[CL, CD, CA, CN, CY, Cp_vec, sinTheta] = newtonianCLCD3D(geometry, alpha, Cp_max, S_ref);
+[CL, CD, CA, CN, CY, Cp_vec, sinTheta] = newtonianCLCD3D(geometry, alpha, Cp_max, S_ref,gamma);
 
 angles = rad2deg(sinTheta);
 

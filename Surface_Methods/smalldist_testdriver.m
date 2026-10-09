@@ -4,7 +4,7 @@ clear
 close all
 
 minf = 3.5;
-alpha = deg2rad(40);
+alpha = deg2rad(25);
 sref_lift = .47;
 sref_drag = .47;
 y = 1.4;
@@ -12,6 +12,6 @@ stlfile = 'Bunny_Bomb - Revolve2.stl';
 showVectors = false;
 
 mu = rad2deg(asin(1/minf));
-[CL, CD, CA, CN, CY, Cp, theta] = smalldist_supersonic(stlfile, alpha, minf, sref_lift, sref_drag,y);
-fprintf('Smal DistCl = %4f, Cd = %4f \n',CL, CD);
-plotVehicleCp3D(stlfile, Cp, rad2deg(theta) , showVectors, [])
+[CL, CD, CA, CN, CY, Cp, theta, centroid, x_cp] = smalldist_supersonic(stlfile, alpha, minf, sref_lift, sref_drag,y);
+fprintf('Smal DistCl = %4f, Cd = %4f x_cp % of length = %4f \n',CL, CD,x_cp);
+%plotVehicleCp3D(stlfile, Cp, rad2deg(theta) , showVectors, [])
