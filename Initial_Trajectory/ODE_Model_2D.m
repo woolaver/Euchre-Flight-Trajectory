@@ -135,6 +135,11 @@ title('Trajectory Simulation');
 legend('show', Location='best');
 hold off
 
+%write final state vector to a csv file
+
+csv_file = [t_total'; state_total'];
+
+writematrix(csv_file, "justin_sucks_cock.csv")
 
 plot(state_total(:,3),state_total(:,1)/343);
 xlabel('height (m)');
