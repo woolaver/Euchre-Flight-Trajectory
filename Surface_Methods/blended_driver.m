@@ -20,7 +20,6 @@ function [Cl,Cd,Cp, x_cp]  = blended_driver(stlfile, alpha, minf, sref_lift, sre
     fprintf('Newtonian: Cl = %4f, Cd = %4f \n',Cl_n, Cd_n);
     fprintf('Blended: Cl = %4f, Cd = %4f \n',Cl, Cd);
 
-
     plotVehicleCp3D(stlfile, Cp, rad2deg(theta_s) , false, [])
 
 end
