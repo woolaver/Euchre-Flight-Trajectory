@@ -1,4 +1,4 @@
-function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alpha,minf, Sref,gamma)
+function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alpha,minf, Sref_lift,sref_drag,gamma)
 % NEWTONIANCLCD3D Modified Newtonian Theory over a full 3D STL mesh (no
 % planar slicing -- every triangle in the mesh contributes).
 %
@@ -79,9 +79,9 @@ x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
 x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
 
 
-CA = -Ftotal(3) / Sref;
-CY = Ftotal(1) / Sref;
-CN = Ftotal(2) / Sref;
+CA = -Ftotal(3) / sref_drag;
+CY = Ftotal(1) / sref_drag;
+CN = Ftotal(2) / Sref_lift;
 
 CL = CN*cos(alpha) - CA*sin(alpha);
 CD = CN*sin(alpha) + CA*cos(alpha);
