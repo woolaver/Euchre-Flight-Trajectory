@@ -6,11 +6,11 @@ function optimal_alpha = optimalAlphaMNT(Mach)
     
     %alpha_vec and Mach_vec must be same as the ones used to create CL_vec
     %and CD_vec
-    alpha_vec = deg2rad(linspace(-30, 30, 100));
-    Mach_vec = linspace(2, 8, 100);
+    alpha_vec = deg2rad(linspace(-30, 30, 500));
+    Mach_vec = linspace(2, 8, 50);
 
-    CL_vec = readmatrix("HARV_CL.csv");
-    CD_vec = readmatrix("HARV_CD.csv");
+    CL_vec = readmatrix("HARV_CL_50_500.csv");
+    CD_vec = readmatrix("HARV_CD_50_500.csv");
 
     CL_at_alpha = zeros([1, N]);
     CD_at_alpha = zeros([1, N]);

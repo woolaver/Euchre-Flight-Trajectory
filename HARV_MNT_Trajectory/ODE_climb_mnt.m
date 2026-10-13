@@ -16,7 +16,7 @@ function state_dot = ODE_climb_mnt(time, state)
 
     %for now assuming constant alpha = 0, will look into changing at later
     %date
-    alpha = 0;
+    alpha = deg2rad(2);
 
     S_ref = (.2^2)*pi; 
 
@@ -31,11 +31,26 @@ function state_dot = ODE_climb_mnt(time, state)
     CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear');
     CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear');
 
+    %assuming flat plate assumption for skin friction calculation
+    c = 2; %m
+    mu = 1.422*10^(-5); %N*s/m^2
+    
+    Cf_turb = @(x) .0592./(((rho.*state(1).*x)./mu).^(1/5));
+    F_turb = (2/c) * integral(Cf_turb, 0, c);
+
+    CD_turb = F_turb*cos(alpha);
+    CL_turb = F_turb*sin(alpha);
+
+    CL = CL + CL_turb;
+    CD = CD + CD_turb + .05;
+
+    disp(state(3))
+
     D = 1/2*rho*state(1)^2*S_ref*CD;
     L = 1/2*rho*state(1)^2*S_ref*CL;
 
-    V_dot = -D/m - g*sin(state(2))
-    gamma_dot = L/(m*state(1)) - (g/state(1))*cos(state(2))
+    %V_dot = -D/m - g*sin(state(2));
+    %gamma_dot = L/(m*state(1)) - (g/state(1))*cos(state(2));
     
     state_dot = [-D/m - g*sin(state(2));
                  L/(m*state(1)) - (g/state(1))*cos(state(2));

@@ -39,8 +39,12 @@ function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alp
 % area; sum over all faces and rotate by alpha into wind axes.
 
 TR = stlread(stlFile);
-V = TR.Points./1000; %Use for HARV/Ice Cream Cone
-%V = TR.Points; %Use for Bunny_Bomb/Virgina
+
+if(stlFile == "Virginia.stl" || stlFile == "Bunny_Bomb - Revolve2.stl")
+    V = TR.Points; %Use for Bunny_Bomb/Virgina
+else
+    V = TR.Points./1000; %Use for HARV/Ice Cream Cone
+end
 F = TR.ConnectivityList;
 
 n = faceNormal(TR);              % Nf x 3, outward unit normals

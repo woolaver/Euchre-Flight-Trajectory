@@ -42,15 +42,15 @@ function [value, isterminal, direction] = hold_speed(t, state)
 end
 
 Mach_init = 8;
-launch_angle = deg2rad(20);
+launch_angle = deg2rad(19);
 init_height = 1;
 [~, a, ~, ~] = atmoscoesa(init_height); %m/s
 V0 = Mach_init*a;
 
 state_0_climb= [V0; launch_angle; init_height; 0];
 time_range_climb = [0 500];
-solver_options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9, 'MaxStep', 1);
-options_climb = odeset(solver_options, 'Events', @cruise_start);
+solver_options_climb = odeset('RelTol', 1e-6, 'AbsTol', 1e-9, 'MaxStep', .1);
+options_climb = odeset(solver_options_climb, 'Events', @cruise_start);
 
 disp("before climb")
 
@@ -61,6 +61,8 @@ if isempty(te_climb)
 end
 
 disp("climb end")
+
+solver_options = odeset('RelTol', 1e-6, 'AbsTol', 1e-9, 'MaxStep', 1);
 
 state_0_cruise = state_climb(end, :);
 time_range_cruise = [t_climb(end), t_climb(end) + 500];

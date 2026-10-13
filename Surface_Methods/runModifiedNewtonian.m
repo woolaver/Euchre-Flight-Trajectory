@@ -12,7 +12,7 @@ geometry = 'Bunny_Bomb - Revolve2.stl';
 %plotSTLRaw(geometry, true)
 
 M_inf = 8;
-alpha = deg2rad(40);
+alpha = deg2rad(20);
 
 gamma = 1.4;
 

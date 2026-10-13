@@ -31,18 +31,31 @@ function state_dot = ODE_cruise_mnt(time, state)
 
     %hold gamma constant -> hold height constant as long as possible
 
-    CL_req = 2*g*m*cos(state(2))/(rho*state(1)^2*S_ref)
+    CL_req = 2*g*m*cos(state(2))/(rho*state(1)^2*S_ref);
 
     CL_max = interp2(alpha_vec, Mach_vec, CL_vec, deg2rad(30), Mach, 'linear');
     
     if (CL_req > CL_max)
-        alpha = deg2rad(30);
+        alpha = optimalAlphaMNT(Mach);
     else
         alpha = findAlphaMNT_CL(CL_req, Mach);
     end
 
     CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear');
     CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear');
+
+     %assuming flat plate assumption for skin friction calculation
+    c = 2; %m
+    mu = 1.422*10^(-5); %N*s/m^2
+    
+    Cf_turb = @(x) .0592./(((rho.*state(1).*x)./mu).^(1/5));
+    F_turb = (2/c) * integral(Cf_turb, 0, c);
+
+    CD_turb = F_turb*cos(alpha);
+    CL_turb = F_turb*sin(alpha);
+
+    CL = CL + CL_turb;
+    CD = CD + CD_turb + .05;
 
     D = 1/2*rho*state(1)^2*S_ref*CD;
     L = 1/2*rho*state(1)^2*S_ref*CL;
