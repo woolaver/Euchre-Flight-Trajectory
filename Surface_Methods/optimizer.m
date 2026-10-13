@@ -13,12 +13,13 @@ y = 1.15;%y as a function of mach
 sref_lift = .42;
 sref_drag = .03;
 
-weight = 120;
+weight = 120*9.81;
 
 rhoinf = 0.458; % Freestream density from standard atmosphere @30k ft
 ainf =303; %speed of sound from standard atmosphere
 qinf = 0.5*rhoinf*(M*ainf)^2; % 
 
+%this gives the min required cl so it doesnt spaz out and give 0 cl and cd
 min_cl = weight/qinf/sref_lift;
 
 
@@ -48,13 +49,35 @@ B= [2;.4
 
 
 %%
+%need to have an optimizer surragote
+
+
+
+
+
+options = optimoptions('surrogateopt', ...
+    'Display','iter', ...
+    'MaxFunctionEvaluations', 300, ...
+    'UseParallel', false, ...
+    'PlotFcn', 'surrogateoptplot', ...
+    'InitialPoints', parameters_0);     
+
+fun = @(x) obj(x, alpha, M, sref_lift, sref_drag, y, min_cl);
+
+[optimal_shape, fval, exitflag, output, trials] = surrogateopt(fun, lb, ub, [], A, B, [], [], options);
+%%
+
+
+
+
+
+
 %need to have an objective function which takes inputs, creates cad file,
 %runs the driver, and then spits out shit
 
 function f = obj(x,alpha,minf,sref_lift,sref_drag,y,min_cl)
-    parameter_names = ['bodyLG','noseLG', 'bodyWD', 'finWD', 'bodyHT'];
-    
-    heightmax = 1.5+sqrt(.2^2-(x(2)/2+x(5))^2);
+    parameter_names = {'bodyLG','noseLG','bodyWD','finWD','bodyHT'};    
+    heightmax = 1.5+sqrt(max(0,.2^2-(x(2)/2+x(5))^2));
     height = .15+x(3)*(heightmax-.15);
     parameter= [x(1), x(2), x(3), x(4), height];
 
@@ -81,27 +104,19 @@ function f = obj(x,alpha,minf,sref_lift,sref_drag,y,min_cl)
     % 4. Access the Equation Manager to modify the global parameter
     eqMgr = swModel.GetEquationMgr();
     numEquations = eqMgr.GetCount();
-    paramFound = false;
+ 
 
-    for i = 0:(numEquations - 1)
-        % Get the name of the equation (format is usually: "ParameterName")
-        eqName = eqMgr.Name(i);
-        
-        % Check if this equation matches your parameter name
-        for j = 1:length(parameter_names)
-            if strcmpi(eqName, parameter_names(j))
-            % SolidWorks equations require strings like: "Length" = 150
-            eqString = sprintf('"%s" = %f', parameter_names(j), parameter(j));
-            eqMgr.Expression(i, eqString);
-            paramFound = true;
-            end
+for i = 0:(numEquations - 1)
+    eqText = strtrim(eqMgr.Equation(i));          % e.g. "bodyLG"= 1.25
+    for j = 1:length(parameter_names)
+        if startsWith(eqText, ['"' parameter_names{j} '"'])
+            eqString = sprintf('"%s" = %f', parameter_names{j}, parameter(j));
+            eqMgr.Equation(i, eqString);
             break
         end
     end
+end
 
-    if ~paramFound
-        warning('Global variable "%s" not found in the model equations.', paramName);
-    end
     % 5. Force a full rebuild of the model geometry
     % Rebuild options: 1 = Force rebuild specified, 2 = Force rebuild all
     fprintf('Rebuilding geometry...\n');
@@ -139,8 +154,10 @@ function f = obj(x,alpha,minf,sref_lift,sref_drag,y,min_cl)
     end
     
     % 7. Clean up connection (closes the document, keeps SolidWorks open)
-    % swApp.CloseDoc(inputFile); % Optional: uncomment to close file in SW
+     swApp.CloseDoc(swModel.GetTitle());
+    swApp.ExitApp();
     release(swApp);
+
 
 
 
@@ -149,26 +166,12 @@ function f = obj(x,alpha,minf,sref_lift,sref_drag,y,min_cl)
     %of sky
     [Cl,Cd,~,x_cp]  = blended_driver(outputFile, alpha, minf, sref_lift, sref_drag,y);
     
-    f = Cl/Cd;
-    if x_cp>cgX_mm
-        f=inf;
+    f = -Cl/Cd;
+    if x_cp<cgX_mm
+        f=1e3;
     end
     if Cl< min_cl
-       f=inf;
+       f=1e3;
     end
 
 end
-
-%%
-%need to have an optimizer surragote
-
-
-options = optimoptions('surrogateopt', ...
-    'Display','iter', ...
-    'MaxFunctionEvaluations', 300, ...   
-    'UseParallel', false, ...
-    'PlotFcn', 'surrogateoptplot',...
-    'InitialPoints', x0,...
-    'IntegerVars', intcon);
-
-[optimal_shape, fval, exitflag, output, trials] =surrogateopt(@obj, lb, ub, [], A, B);

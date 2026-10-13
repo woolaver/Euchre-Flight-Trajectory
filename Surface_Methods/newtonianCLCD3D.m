@@ -1,4 +1,4 @@
-function [CL, CD, CA, CN, CY, Cp, sinTheta] = newtonianCLCD3D(stlFile, alpha,minf, Sref,gamma)
+function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alpha,minf, Sref,gamma)
 % NEWTONIANCLCD3D Modified Newtonian Theory over a full 3D STL mesh (no
 % planar slicing -- every triangle in the mesh contributes).
 %
@@ -49,6 +49,9 @@ v1 = V(F(:,1),:); v2 = V(F(:,2),:); v3 = V(F(:,3),:);
 areaVec = 0.5 * cross(v2 - v1, v3 - v1, 2);
 dA = sqrt(sum(areaVec.^2, 2));   % Nf x 1, true triangle areas
 
+%get center point coordinate for each panel
+centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
+
 %currently set so that nose is pointing in positive z direction because
 %thats what trevor did for some reason
 Vinf = [0, -sin(alpha), cos(alpha)];
@@ -68,6 +71,13 @@ Cp(windward) = CpMax * sinTheta(windward).^2;
 
 dF = -Cp .* n .* dA;              % Nf x 3, force contribution per face
 Ftotal = sum(dF, 1);              % 1 x 3
+
+%solvng for center of pressure
+%multiply df for cz by x, divide by total length
+x_axial = centroid(:,3);
+x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
+x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
+
 
 CA = -Ftotal(3) / Sref;
 CY = Ftotal(1) / Sref;

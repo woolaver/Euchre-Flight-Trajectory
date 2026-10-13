@@ -14,7 +14,6 @@ areaVec = 0.5 * cross(v2 - v1, v3 - v1, 2);
 dA = sqrt(sum(areaVec.^2, 2));   % Nf x 1, true triangle areas
 
 %get center point coordinate for each panel
-%get center point coordinate for each panel
 centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
 
 

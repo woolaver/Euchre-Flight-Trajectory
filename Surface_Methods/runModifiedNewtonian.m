@@ -11,7 +11,7 @@ geometry = 'Bunny_Bomb - Revolve2.stl';
 %helper function to ensure .stl file is correct
 %plotSTLRaw(geometry, true)
 
-M_inf = 8;
+M_inf = 5;
 alpha = deg2rad(40);
 
 gamma = 1.4;

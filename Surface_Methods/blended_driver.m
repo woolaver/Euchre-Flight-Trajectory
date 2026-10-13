@@ -1,7 +1,7 @@
 function [Cl,Cd,Cp, x_cp]  = blended_driver(stlfile, alpha, minf, sref_lift, sref_drag,y)
     
-    [Cl_s, Cd_s, ~, ~, ~, Cp_s, theta_s, ~, x_cp] = smalldist_supersonic(stlfile, alpha, minf, sref_lift, sref_drag,y);
-    [Cl_n, Cd_n, ~, ~, ~, Cp_n, sinTheta] = newtonianCLCD3D(stlfile, alpha,minf, sref_lift, y);
+    [Cl_s, Cd_s, ~, ~, ~, Cp_s, theta_s, ~, x_cp_s] = smalldist_supersonic(stlfile, alpha, minf, sref_lift, sref_drag,y);
+    [Cl_n, Cd_n, ~, ~, ~, Cp_n, ~, x_cp_n] =S newtonianCLCD3D(stlfile, alpha,minf, sref_lift, y);
 
     %interpolation
     M1 = 3;   % below small dist
@@ -15,6 +15,7 @@ function [Cl,Cd,Cp, x_cp]  = blended_driver(stlfile, alpha, minf, sref_lift, sre
     Cp = (1 - w).*Cp_s + w.*Cp_n;
     Cl = (1 - w).*Cl_s + w.*Cl_n;
     Cd = (1 - w).*Cd_s + w.*Cd_n;
+    x_cp = (1 - w).*x_cp_s + w.*x_cp_n;
 
     fprintf('Small Dist: Cl = %4f, Cd = %4f \n',Cl_s, Cd_s);
     fprintf('Newtonian: Cl = %4f, Cd = %4f \n',Cl_n, Cd_n);
