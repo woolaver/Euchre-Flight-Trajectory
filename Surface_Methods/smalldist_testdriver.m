@@ -4,7 +4,7 @@ clear
 close all
 
 minf = 5;
-alpha = deg2rad(40);
+alpha = deg2rad(20);
 sref_lift = .42;
 sref_drag = .03;
 y = 1.4;

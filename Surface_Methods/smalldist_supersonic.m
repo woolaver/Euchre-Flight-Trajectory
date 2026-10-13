@@ -54,7 +54,7 @@ x_axial = centroid(:,3);
 x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
 x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
 
-Cx = Ftotal(3) / sref_drag;  %forces in x direction, nose to tail should be 1
+Cx = -Ftotal(3) / sref_drag;  %forces in x direction, nose to tail should be 1
 Cy = Ftotal(1) / sref_drag;      %forces in y drection, out wing,  shouldnt need this should be 2
 Cz = Ftotal(2) / sref_lift;    %forces in z, up should be 3 but bunny bomb is cooked
 
