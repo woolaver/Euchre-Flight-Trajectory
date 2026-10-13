@@ -10,8 +10,8 @@ y = 1.15;%y as a function of mach
 
 %these are hard coded because it will be very annoying to actually nfind
 %these and they wont change that much
-sref_lift = 
-sref_drag = 
+sref_lift = .42;
+sref_drag = .03;
 
 weight = 120;
 
@@ -23,30 +23,44 @@ min_cl = weight/qinf/sref_lift;
 
 
 %%
-%need to have a matrix with all the paramaters I want to change
-%[length, diameter, length of cone, length of body, .......]
+%need to have a matrix with all the parameters I want to change
 
-parameter_names = ['length','some bullshit'];
-parameters_0 = [];
+%             'bodyLG','noseLG' 'bodyWD','finWD', height fraction',];
+parameters_0 = [1.25     .74     .2        .1            .75 ];
 
 %%
 %need to have lb and ub for the parameters
-lb = [];
+lb = [.5 .25 .15 .05 0 ];
 
-ub = [];
+ub = [1.5 1.5 .3 .125 1];
 
+A = [1 1 0 0 0 ; %maxes out length
+     0 0 1 2 0; %maxes out width
+   
+    
 
+];
+
+B= [2;.4
+    
+];
 
 
 
 %%
 %need to have an objective function which takes inputs, creates cad file,
-%runs the driver, and then spits out 
+%runs the driver, and then spits out shit
 
-function f = obj(parameter,parameter_names,alpha,minf,sref_lift,sref_drag,y,min_cl)
+function f = obj(x,alpha,minf,sref_lift,sref_drag,y,min_cl)
+    parameter_names = ['bodyLG','noseLG', 'bodyWD', 'finWD', 'bodyHT'];
+    
+    heightmax = 1.5+sqrt(.2^2-(x(2)/2+x(5))^2);
+    height = .15+x(3)*(heightmax-.15);
+    parameter= [x(1), x(2), x(3), x(4), height];
+
     %creates cad
-    inputFile  = 'C:\Path\To\Your\PartFile.SLDPRT'; % Must be full path
-    outputFile = 'C:\Path\To\Your\OutputFile.stl';   % Must end in .stl
+    inputFile  = 'N:\dotfiles\Desktop\euchre\virginia.SLDPRT'; 
+    outputFile = 'N:\dotfiles\Desktop\euchre\virginia.STL';   
     try
         % Hook into or launch SolidWorks
         swApp = actxserver('SldWorks.Application');
@@ -157,4 +171,4 @@ options = optimoptions('surrogateopt', ...
     'InitialPoints', x0,...
     'IntegerVars', intcon);
 
-[optimal_shape, fval, exitflag, output, trials] =surrogateopt(@obj, lb, ub);
+[optimal_shape, fval, exitflag, output, trials] =surrogateopt(@obj, lb, ub, [], A, B);
