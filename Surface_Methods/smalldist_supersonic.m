@@ -2,7 +2,13 @@ function [CL, CD, Cx, Cz, Cy, Cp, theta, centroid, x_cp] = smalldist_supersonic(
 %The aim of this script is to make a low fidelity solver for supersonic 
 %will miss blunt edges correct later
 TR = stlread(stlFile);
-V = TR.Points;
+
+if(stlFile == "Virginia.stl" || stlFile == "Bunny_Bomb - Revolve2.stl")
+    V = TR.Points; %Use for Bunny_Bomb/Virgina
+else
+    V = TR.Points./1000; %Use for HARV/Ice Cream Cone
+end
+
 F = TR.ConnectivityList;
 
 n = faceNormal(TR);              % Nf x 3, outward unit normals
