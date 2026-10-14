@@ -167,7 +167,7 @@ end
     [Cl,Cd,~,x_cp]  = blended_driver(outputFile, alpha, minf, sref_lift, sref_drag,y);
     
     f = -Cl/Cd;
-    if x_cp<cgX_mm
+    if x_cp<cgX
         f=1e3;
     end
     if Cl< min_cl
