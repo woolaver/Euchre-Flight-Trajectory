@@ -38,9 +38,9 @@ p02_pinf=(((y+1)^2*minf^2)/(4*y*minf^2- 2*(y-1)))^(y/(y-1))*(1-y+2*y*minf^2)/(y+
 
 Cp_max = (2 / (y * minf^2)) * (p02_pinf - 1);
 Cp_min = -2 / (y * minf^2); %if p02/pinf was 0 basically
- disp(p02_pinf);
-disp(Cp_max);
- disp(Cp_min);
+%disp(p02_pinf);
+%disp(Cp_max);
+%disp(Cp_min);
 Cp = max(min(Cp, Cp_max), Cp_min);   % going through and min maxing the cp points
 
 
@@ -54,7 +54,7 @@ x_axial = centroid(:,3);
 x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
 x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
 
-Cx = Ftotal(3) / sref_drag;  %forces in x direction, nose to tail should be 1
+Cx = -Ftotal(3) / sref_drag;  %forces in x direction, nose to tail should be 1
 Cy = Ftotal(1) / sref_drag;      %forces in y drection, out wing,  shouldnt need this should be 2
 Cz = Ftotal(2) / sref_lift;    %forces in z, up should be 3 but bunny bomb is cooked
 
