@@ -103,4 +103,3 @@ saveTable = array2table(saveArray, 'VariableNames', {'Time (s)', ...
     'Density (kg/m^3)', 'Mach Number'});
 
 writeTable(saveTable, 'Virginia_Trajectory.csv');
-

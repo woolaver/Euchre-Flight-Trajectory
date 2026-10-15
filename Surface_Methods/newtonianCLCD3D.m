@@ -1,18 +1,10 @@
-function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alpha,minf, Sref_lift,sref_drag,gamma)
-% NEWTONIANCLCD3D Modified Newtonian Theory over a full 3D STL mesh (no
-% planar slicing -- every triangle in the mesh contributes).
-%
-% [CL, CD, CA, CN, CY, Cp] = newtonianCLCD3D(stlFile, alphaDeg, CpMax, Sref)
+function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alpha, minf, Sref_lift, Sref_drag, gamma)
+% NEWTONIANCLCD3D Modified Newtonian Theory over a full 3D STL mesh
 %
 % Inputs:
-%   stlFile  - path to .stl file
-%   alpha    - angle of attack, radians. ASSUMES body axes with x = axial
-%              (nose-to-tail) and z = "up" -- freestream direction is
-%              taken as [cos(alpha), 0, sin(alpha)]. If your STL's axes
-%              don't match this (e.g. z is spanwise instead), rotate the
-%              mesh first or edit the Vinf line below.
-%   CpMax    - stagnation Cp behind a normal shock at the flight Mach
-%              number (see rayleighPitotCpMax.m)
+%   stlFile  - stlFile path
+%   alpha    - angle of attack, radians
+%  
 %   Sref     - reference AREA for nondimensionalizing the force integral
 %              (e.g. planform area or a chosen cross-sectional area).
 %              This replaces the reference LENGTH used in the old 2D
@@ -31,12 +23,7 @@ function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alp
 %                (same face order as the STL's ConnectivityList -- pass
 %                straight into plotVehicleCp3D for visualization)
 %
-% Method: for each triangle, sin(theta) = dot(freestream_dir, outward
-% normal). Windward faces (sin(theta) > 0) get Cp = CpMax*sin(theta)^2;
-% shadowed faces get Cp = 0 (basic Newtonian shadowing -- same caveat as
-% before: a leeside correction would improve accuracy here). Force on
-% each face acts along -outward_normal, weighted by the face's true
-% area; sum over all faces and rotate by alpha into wind axes.
+
 
 TR = stlread(stlFile);
 
@@ -60,8 +47,6 @@ centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
 %thats what trevor did for some reason
 Vinf = [0, -sin(alpha), cos(alpha)];
 
-
-
 sinTheta = n * Vinf';             % Nf x 1
 Cp = zeros(size(sinTheta));
 
@@ -83,8 +68,8 @@ x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
 x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
 
 
-CA = -Ftotal(3) / sref_drag;
-CY = Ftotal(1) / sref_drag;
+CA = -Ftotal(3) / Sref_drag;
+CY = Ftotal(1) / Sref_drag;
 CN = Ftotal(2) / Sref_lift;
 
 CL = CN*cos(alpha) - CA*sin(alpha);
