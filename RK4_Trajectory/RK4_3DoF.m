@@ -23,6 +23,9 @@ function [t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file,
     m = 120; %kg
     g = 9.8; %m/s^2
 
+    CL_vec = readmatrix(CL_vec_file);
+    CD_vec = readmatrix(CD_vec_file);
+
     %populate first column of usefulData
     [~, a, ~, rho] = atmoscoesa(state0(3));
         
@@ -38,22 +41,33 @@ function [t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file,
     
     while(climb_end == 0) 
 
+         disp(state(3, i))
+
         [~, a, ~, rho] = atmoscoesa(state(3, i));
         Mach = state(1, i)/a;
     
         %for now hard set alpha constant during climb
-        alpha = deg2rad(4.75);
+        %4.75 for virginia, .5 for Ice Cream Cone, 0 for HARV, 3 for Bunny Bomb 
+
+        alpha = deg2rad(3);
 
         %alpha_vec and Mach_vec must be the same size and steps used to
         %create CL_vec_file and CD_vec_file for interpolation to work
         alpha_vec = deg2rad(linspace(-30, 30, 200));
         Mach_vec = linspace(2, 8, 200);
 
-        CL_vec = readmatrix(CL_vec_file);
-        CD_vec = readmatrix(CD_vec_file);
-
         CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear');
         CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear');
+
+        if(isnan(CL))
+            CL = 0;
+            disp("CL returned Nan, default value of 0 is used")
+        end
+
+        if(isnan(CD))
+            CD = .1;
+            disp("CD returned NaN, default value of .1 is used")
+        end
 
         D = 1/2*rho*state(1, i)^2*Sref_drag*CD;
         L = 1/2*rho*state(1, i)^2*Sref_lift*CL;
@@ -132,10 +146,12 @@ function [t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file,
             alpha = 0;
             dive = 1;
             glide = 0;
-        %elseif ((CL_req + .05) > CL_max || glide == 1)
-        elseif(Mach < 5 || glide == 1)
+        elseif((Mach < 5 || glide == 1) || CL_req > CL_max)
             %alpha = optimal_LD(Mach, LD_vec);
-            alpha = deg2rad(4);
+            %alpha glide is determined by trial and error, could/should set
+            %up some simple optimization or atleast run a sweep to
+            %determine true best value
+            alpha = deg2rad(9.25); %4 for virginia, 25 for IceCreamCone, 20 for HARV
             glide = 1;
         else
             alpha = findAlphaReq(CL_req, Mach, CL_vec);

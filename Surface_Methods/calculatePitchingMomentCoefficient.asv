@@ -1,0 +1,39 @@
+%Use Cp distribution from Newtownian Theory to calculate pitching moment
+%coefficient from Mach 2 to Mach 8
+
+clc
+close all
+clear
+
+Mach_vec = linspace(2, 8, 7);
+alpha_vec = deg2rad(linspace(-30, 30, 200));
+Sref_lift = .439; %m^2
+Sref_drag = .035; %m^2
+c = 2; %m, reference length
+
+x_cg = .6*c; %assumption for now, 60% of body
+
+gamma = 1.4;
+
+stlFile = "csv_files\Virginia.stl";
+
+Cm_cg = zeros([length(Mach_vec), length(alpha_vec)]);
+
+for i = 1:length(Mach_vec)
+    for j = 1:length(alpha_vec)
+        [Cl, Cd , ~,x_cp] = blended_driver(stlFile, alpha_vec(j), Mach(i), Sref_lift, Sref_drag, gamma);
+        Cm_cg(i, j) = -1*((x_cg - x_cp)/c) * CL;
+    end
+end
+
+figure()
+hold on
+plot(rad2deg(alpha), Cm_cg(1, :), 'LineWidth', 1)
+plot(rad2deg(alpha), Cm_cg(1, :), 'LineWidth', 1, 'Color', 'Blue')
+plot(rad2deg(alpha), Cm_cg(1, :), 'LineWidth', 1, 'Color', 'Blue')
+plot(rad2deg(alpha), Cm_cg(1, :), 'LineWidth', 1, 'Color', 'Blue')
+plot(rad2deg(alpha), Cm_cg(1, :), 'LineWidth', 1, 'Color', 'Blue')
+plot(rad2deg(alpha), Cm_cg(1, :), 'LineWidth', 1, 'Color', 'Blue')
+
+title('Moment Coefficient vs. Angle of Attack')
+xlabel('Angle of Attack')

@@ -6,10 +6,10 @@ clc
 close all
 
 
-%stlfile = 'Virginia.stl';
-%stlfile = 'HARV.stl';
-%stlfile = 'Ice_Cream_Cone_STL.STL';
-stlfile = 'Bunny_Bomb - Revolve2.stl';
+%stlfile = 'csv_files\Virginia.stl';
+%stlfile = 'csv_files\HARV.stl';
+stlfile = 'csv_files\Ice_Cream_Cone_STL.STL';
+%stlfile = 'csv_files\Bunny_Bomb - Revolve2.stl';
 
 %helper function to ensure .stl file is correct
 %plotSTLRaw(geometry, true)
@@ -35,19 +35,19 @@ sref_drag = .029; %m^2
 %}
 
 %Ice Cream Cone
-%{
+
 sref_lift = .253; %m^2
 sref_drag = .0299; %m^2 
 %Note: Took the diameter of the thickest part and
 %assumed it is a circle then found area, not exactly the thickets cross
 %sectional area but pretty close for sref_drag
-%}
+
 
 %Bunny Bomb
-
+%{
 sref_lift = .467; %m^2
 sref_drag = .049; %m^2
-
+%}
 
 for i = 1:200
     disp(i)
@@ -72,8 +72,8 @@ for i = 1:200
     end
 end
 
-datafile_CL = "Bunny_Bomb_blended_CL.csv";
+datafile_CL = "Ice_Cream_Cone_blended_CL.csv";
 writematrix(CL_vec, datafile_CL)
 
-datafile_CD = "Bunny_Bomb_blended_CD.csv";
+datafile_CD = "Ice_Cream_Cone_blended_CD.csv";
 writematrix(CD_vec, datafile_CD)
