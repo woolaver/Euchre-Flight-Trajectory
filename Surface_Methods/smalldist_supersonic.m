@@ -28,7 +28,8 @@ centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
 % Vinf = [cos(alpha), 0, sin(alpha)]; % 1x3 da vector for velocity
 vinf = [0, -sin(alpha), cos(alpha)];
 
-theta = asin(n * vinf');        %nfx1 this is dot product between normals and the velocity vector to find theta    
+s = min(max(n * vinf', -1), 1);
+theta = asin(s);       %nfx1 this is dot product between normals and the velocity vector to find theta    
 Cp = 2.*theta./(sqrt(minf.^2-1));
 
 %still feel a little sus about this
