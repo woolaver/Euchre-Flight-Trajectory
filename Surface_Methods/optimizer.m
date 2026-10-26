@@ -5,7 +5,7 @@ catch
     swApp = actxserver('SldWorks.Application'); pause(5)
 end
 set(swApp, 'Visible', true);
-spec = invoke(swApp, 'GetOpenDocSpec', 'N:\dotfiles\Desktop\euchre\virginia.SLDPRT');
+spec = invoke(swApp, 'GetOpenDocSpec', 'N:\dotfiles\Desktop\euchre\blend_sharp.SLDPRT');
 set(spec, 'Silent', true);
 swModel = invoke(swApp, 'OpenDoc7', spec);
 
@@ -22,6 +22,8 @@ y = 1.15;%y as a function of mach
 sref_lift = .42;
 sref_drag = .03;
 
+
+
 weight = 120*9.81;
 
 rhoinf = 0.458; % Freestream density from standard atmosphere @30k ft
@@ -34,26 +36,37 @@ min_cl = weight/qinf/sref_lift;
 
 %%
 %need to have a matrix with all the parameters I want to change
-
-%             'bodyLG','noseLG' 'bodyWD','finWD', height fraction',];
-parameters_0 = [1.25     .74     .2        .075            .75 ];
+%              
+%             'heightFRAC','lowHT' 'bodyWD','bodyLG', 'humpLG', 'humpWD','humpUpHT', 'humpLowHT'];
+parameters_0 = [.6           .074     .3      1.5      .5          .23      .2           .09 ];
 
 %%
 %need to have lb and ub for the parameters
-lb = [.5 .25 .15 .05 0 ];
 
-ub = [1.5 1.5 .3 .125 1];
+lb = [0  0 .15   1.25   .3    .1  .1  0 ];
 
-A = [1 1 0 0 0 ; %maxes out length
-     0 0 1 2 0; %maxes out width
-   
-    
+ub = [1 .15  .38   2   .7    .3   .3  .15 ];
 
-];
 
-B= [2;.4
-    
-];
+
+%all of this for virginia
+
+%             'bodyLG','noseLG' 'bodyWD','finWD', height fraction',];
+%parameters_0 = [1.25     .74     .2        .075            .75 ];
+% lb = [.5 .25 .15 .05 0 ];
+% 
+% ub = [1.5 1.5 .3 .125 1];
+% 
+% A = [1 1 0 0 0 ; %maxes out length
+%      0 0 1 2 0; %maxes out width
+% 
+% 
+% 
+% ];
+% 
+% B= [2;.4
+% 
+% ];
 
 
 
@@ -72,7 +85,7 @@ options = optimoptions('surrogateopt', ...
     'InitialPoints', parameters_0);     
 
 fun = @(x) obj(x, swApp, swModel, alpha, M, sref_lift, sref_drag, y, min_cl);
-[optimal_shape, fval, exitflag, output, trials] = surrogateopt(fun, lb, ub, [], A, B, [], [], options);
+[optimal_shape, fval, exitflag, output, trials] = surrogateopt(fun, lb, ub, [], [],[], [], [], options);
 %%
 
 
@@ -89,13 +102,14 @@ function out = obj(x, swApp, swModel, alpha, minf, sref_lift, sref_drag, y, min_
 
     AX = 3;     % axial column in the CAD/STL frame (confirm with range(TR.Points))
 
-    parameter_names = {'bodyLG','noseLG','bodyWD','finWD','bodyHT'};
+    parameter_names = {'upHT','lowHT' 'bodyWD','bodyLG', 'humpLG', 'humpWD','humpUpHT', 'humpLowHT'};
+    % parameter_names = {'bodyLG','noseLG','bodyWD','finWD','bodyHT'};
     R = .2;
-    heightmax = R + sqrt(max(0, R^2 - (x(3)/2 + x(4))^2));
-    height    = .15 + x(5)*(heightmax - .15);
-    parameter = [x(1), x(2), x(3), x(4), height];
+    heightmax = R + sqrt(max(0, R^2 - (x(3)/2)^2));
+    height    = .15-x(2) + x(1)*(heightmax - (.15-x(2)));
+    parameter = [height,x(2), x(3), x(4), x(5), x(6), x(7),x(8)];
 
-    outputFile = 'N:\dotfiles\Desktop\euchre\virginia.STL';
+    outputFile = 'N:\dotfiles\Desktop\euchre\blend_sharp.STL';
     if isfile(outputFile), delete(outputFile); end
 
     try

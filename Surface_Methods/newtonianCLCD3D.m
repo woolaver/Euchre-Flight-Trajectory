@@ -27,7 +27,7 @@ function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alp
 
 TR = stlread(stlFile);
 
-if(stlFile == "Virginia.stl" || stlFile == "Bunny_Bomb - Revolve2.stl")
+if(stlFile == "Virginia.stl" || stlFile == "Bunny_Bomb - Revolve2.stl"|| stlFile == 'N:\dotfiles\Desktop\euchre\blend_sharp.STL')
     V = TR.Points; %Use for Bunny_Bomb/Virgina
 else
     V = TR.Points./1000; %Use for HARV/Ice Cream Cone

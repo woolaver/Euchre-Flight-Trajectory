@@ -3,8 +3,8 @@ function [CL, CD, Cx, Cz, Cy, Cp, theta, centroid, x_cp] = smalldist_supersonic(
 %will miss blunt edges correct later
 TR = stlread(stlFile);
 
-if(stlFile == "Virginia.stl" || stlFile == "Bunny_Bomb - Revolve2.stl")
-    V = TR.Points; %Use for Bunny_Bomb/Virgina
+if(stlFile == "Virginia.stl" || stlFile == "Bunny_Bomb - Revolve2.stl"|| stlFile == 'N:\dotfiles\Desktop\euchre\blend_sharp.STL')
+    V = TR.Points; %Use for Bunny_Bomb/Virgina/
 else
     V = TR.Points./1000; %Use for HARV/Ice Cream Cone
 end
