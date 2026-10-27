@@ -11,6 +11,7 @@ swModel = invoke(swApp, 'OpenDoc7', spec);
 
 
 
+
 %%
 %need to have flight regime info
 M = 4.5;%Mach
@@ -37,17 +38,18 @@ min_cl = weight/qinf/sref_lift;
 %%
 %need to have a matrix with all the parameters I want to change
 %              
-%             'heightFRAC','lowHT' 'bodyWD','bodyLG', 'humpLG', 'humpWD','humpUpHT', 'humpLowHT'];
-parameters_0 = [.6           .074     .3      1.5      .5          .23      .2           .09 ];
+%             'aft_heightFRAC','lowHT' 'bodyWD','bodyLG', 'humpLG %', 'humpWD','hmp_heightfrac', 'humpLowHT'];
+parameters_0 = [.6              .074     .3      1.5      .5          .23        1.2           .09 ];
 
 %%
 %need to have lb and ub for the parameters
 
-lb = [0  0 .15   1.25   .3    .1  .1  0 ];
+lb = [0   0 .15   1.25   .1    .1  .7  0 ];
 
-ub = [1 .15  .38   2   .7    .3   .3  .15 ];
+ub = [.7 .15  .38   2   .7    .3   1.35  .15 ];
 
-
+A = [0 0 -1 0 0 1 0 0];   % humpWD - bdyWD <= 0
+B = 0;
 
 %all of this for virginia
 
@@ -79,13 +81,18 @@ ub = [1 .15  .38   2   .7    .3   .3  .15 ];
 
 options = optimoptions('surrogateopt', ...
     'Display','iter', ...
-    'MaxFunctionEvaluations', 300, ...
+    'MaxFunctionEvaluations', 1000, ...
     'UseParallel', false, ...
     'PlotFcn', 'surrogateoptplot', ...
     'InitialPoints', parameters_0);     
 
 fun = @(x) obj(x, swApp, swModel, alpha, M, sref_lift, sref_drag, y, min_cl);
-[optimal_shape, fval, exitflag, output, trials] = surrogateopt(fun, lb, ub, [], [],[], [], [], options);
+
+% test_out = fun(parameters_0);
+% disp(test_out.Ineq)
+% return       
+
+[optimal_shape, fval, exitflag, output, trials] = surrogateopt(fun, lb, ub, [], A,B, [], [], options);
 %%
 
 
@@ -98,16 +105,20 @@ fun = @(x) obj(x, swApp, swModel, alpha, M, sref_lift, sref_drag, y, min_cl);
 
 function out = obj(x, swApp, swModel, alpha, minf, sref_lift, sref_drag, y, min_cl)
     out.Fval = 1e3;
-    out.Ineq = [1;1];
+    out.Ineq = [10;10];
 
-    AX = 3;     % axial column in the CAD/STL frame (confirm with range(TR.Points))
+    AX = 3;     % axial column in the CAD/STL frame 
 
-    parameter_names = {'upHT','lowHT' 'bodyWD','bodyLG', 'humpLG', 'humpWD','humpUpHT', 'humpLowHT'};
+    parameter_names = {'upHT','lowHT' 'bdyWD','bdyLG', 'humpLG', 'humpWD','humpUpHT', 'humpLowHT'};
     % parameter_names = {'bodyLG','noseLG','bodyWD','finWD','bodyHT'};
     R = .2;
     heightmax = R + sqrt(max(0, R^2 - (x(3)/2)^2));
-    height    = .15-x(2) + x(1)*(heightmax - (.15-x(2)));
-    parameter = [height,x(2), x(3), x(4), x(5), x(6), x(7),x(8)];
+    aft_height    = .15-x(2) + x(1)*(heightmax - (.15-x(2)));
+    hmp_height = aft_height*x(7);
+
+
+
+    parameter = [aft_height,x(2), x(3), x(4), x(5), x(6), hmp_height, x(8)];
 
     outputFile = 'N:\dotfiles\Desktop\euchre\blend_sharp.STL';
     if isfile(outputFile), delete(outputFile); end
@@ -146,18 +157,24 @@ function out = obj(x, swApp, swModel, alpha, minf, sref_lift, sref_drag, y, min_
     end
 
     TR = stlread(outputFile);
-    ax = TR.Points(:, AX)*1e-3;
-    cg_frac = (max(ax) - cg(AX)) / (max(ax) - min(ax));     % 0 = nose, assuming nose at max end
+    ax = TR.Points(:, AX);
+    cg_frac = (cg(AX)-min(ax) ) / (max(ax) - min(ax));     % 0 = nose, assuming nose at max end
 
-    [Cl,Cd,~,x_cp] = blended_driver(outputFile, alpha, minf, sref_lift, sref_drag, y);
-    if ~isfinite(Cl) || ~isfinite(Cd) || Cd <= 0 || ~isfinite(x_cp)
-        fprintf('FAIL: bad solve  Cl=%g Cd=%g x_cp=%g\n', Cl, Cd, x_cp); return
+    [Cl,Cd,~,x_cp_frac] = blended_driver(outputFile, alpha, minf, sref_lift, sref_drag, y);
+    if ~isfinite(Cl) || ~isfinite(Cd) || Cd <= 0 || ~isfinite(x_cp_frac)
+        fprintf('FAIL: bad solve  Cl=%g Cd=%g x_cp=%g\n', Cl, Cd, x_cp_frac); return
     end
-
+    disp(parameter)
+    fprintf('cg_frac=%.3f  x_cp_frac=%.3f  Cl=%.3g  Cd=%.3g  min_cl=%.4f\n', cg_frac, x_cp_frac, Cl, Cd, min_cl);
+    fprintf('STL axial %.3f to %.3f m,  CG axial %.3f m\n', min(ax), max(ax), cg(AX));
     out.Fval = -Cl/Cd;
-    out.Ineq = [cg_frac - x_cp;
+    out.Ineq = [cg_frac - x_cp_frac;
                 min_cl - Cl];
 end
+
+
+
+
 
 
 

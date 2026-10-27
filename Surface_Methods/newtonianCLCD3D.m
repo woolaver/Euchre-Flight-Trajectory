@@ -1,4 +1,4 @@
-function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alpha, minf, Sref_lift, Sref_drag, gamma)
+function [CL, CD, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alpha, minf, sref_lift, sref_drag, gamma)
 % NEWTONIANCLCD3D Modified Newtonian Theory over a full 3D STL mesh
 %
 % Inputs:
@@ -27,10 +27,11 @@ function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alp
 
 TR = stlread(stlFile);
 
-if(stlFile == "Virginia.stl" || stlFile == "Bunny_Bomb - Revolve2.stl"|| stlFile == 'N:\dotfiles\Desktop\euchre\blend_sharp.STL')
-    V = TR.Points; %Use for Bunny_Bomb/Virgina
+% if(stlFile == "Virginia.stl" || stlFile == "Bunny_Bomb - Revolve2.stl"|| stlFile == 'N:\dotfiles\Desktop\euchre\blend_sharp.STL')
+if(stlFile == "HARV.stl" || stlFile == "Ice_Cream_Cone.stl")
+    V = TR.Points./1000; %Use for HARV/Ice Cream Cone 
 else
-    V = TR.Points./1000; %Use for HARV/Ice Cream Cone
+    V = TR.Points; %Use for Bunny_Bomb/Virgina/etc
 end
 F = TR.ConnectivityList;
 
@@ -45,7 +46,7 @@ centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
 
 %currently set so that nose is pointing in positive z direction because
 %thats what trevor did for some reason
-Vinf = [0, -sin(alpha), cos(alpha)];
+Vinf = [0, -sin(alpha), -cos(alpha)];
 
 sinTheta = n * Vinf';             % Nf x 1
 Cp = zeros(size(sinTheta));
@@ -68,11 +69,10 @@ x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
 x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
 
 
-CA = -Ftotal(3) / Sref_drag;
-CY = Ftotal(1) / Sref_drag;
-CN = Ftotal(2) / Sref_lift;
-
-CL = CN*cos(alpha) - CA*sin(alpha);
-CD = CN*sin(alpha) + CA*cos(alpha);
-
+Fx = Ftotal(3);              % axial
+Fz =  Ftotal(2);              % normal
+L  = Fz*cos(alpha) - Fx*sin(alpha);
+D  = Fz*sin(alpha) + Fx*cos(alpha);
+CL = L / sref_lift;
+CD = D / sref_lift;
 end
