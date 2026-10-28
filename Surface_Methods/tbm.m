@@ -1,4 +1,4 @@
-function [p2op1, t2op1, rho2op1, cp, M2] = tbm(M1, t)
+function cp = tbm(M1, t)
 % function [p2op1, M2] = tbm(M1, t)
 % Calculates post-oblique shock properties
 % INPUTS:

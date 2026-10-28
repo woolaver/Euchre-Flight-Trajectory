@@ -44,9 +44,9 @@ parameters_0 = [.6              .074     .3      1.5      .5          .23       
 %%
 %need to have lb and ub for the parameters
 
-lb = [0   0 .15   1.25   .1    .1  .7  0 ];
+lb = [0   0   .15   1.25   .1    .1   .7       0 ];
 
-ub = [.7 .15  .38   2   .7    .3   1.35  .15 ];
+ub = [.7 .15  .38   2       .7    .3   1.35  .15 ];
 
 A = [0 0 -1 0 0 1 0 0];   % humpWD - bdyWD <= 0
 B = 0;
@@ -112,7 +112,7 @@ function out = obj(x, swApp, swModel, alpha, minf, sref_lift, sref_drag, y, min_
     parameter_names = {'upHT','lowHT' 'bdyWD','bdyLG', 'humpLG', 'humpWD','humpUpHT', 'humpLowHT'};
     % parameter_names = {'bodyLG','noseLG','bodyWD','finWD','bodyHT'};
     R = .2;
-    min_height = .1;
+    min_height = .12;
     heightmax = R + sqrt(max(0, R^2 - (x(3)/2)^2));
     aft_height    = min_height-x(2) + x(1)*(heightmax - (min_height-x(2)));
     hmp_height = aft_height*x(7);
