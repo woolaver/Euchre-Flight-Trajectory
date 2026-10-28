@@ -112,8 +112,9 @@ function out = obj(x, swApp, swModel, alpha, minf, sref_lift, sref_drag, y, min_
     parameter_names = {'upHT','lowHT' 'bdyWD','bdyLG', 'humpLG', 'humpWD','humpUpHT', 'humpLowHT'};
     % parameter_names = {'bodyLG','noseLG','bodyWD','finWD','bodyHT'};
     R = .2;
+    min_height = .1;
     heightmax = R + sqrt(max(0, R^2 - (x(3)/2)^2));
-    aft_height    = .15-x(2) + x(1)*(heightmax - (.15-x(2)));
+    aft_height    = min_height-x(2) + x(1)*(heightmax - (min_height-x(2)));
     hmp_height = aft_height*x(7);
 
 
@@ -168,7 +169,7 @@ function out = obj(x, swApp, swModel, alpha, minf, sref_lift, sref_drag, y, min_
     fprintf('cg_frac=%.3f  x_cp_frac=%.3f  Cl=%.3g  Cd=%.3g  min_cl=%.4f\n', cg_frac, x_cp_frac, Cl, Cd, min_cl);
     fprintf('STL axial %.3f to %.3f m,  CG axial %.3f m\n', min(ax), max(ax), cg(AX));
     out.Fval = -Cl/Cd;
-    out.Ineq = [cg_frac - x_cp_frac;
+    out.Ineq = [cg_frac - x_cp_frac-.2;
                 min_cl - Cl];
 end
 
