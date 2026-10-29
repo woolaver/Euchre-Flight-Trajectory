@@ -6,6 +6,8 @@ clear
 clc
 close all
 
+vehicleProperties = blend_round_properties();
+
 height_init = 1;
 
 [~, a, ~, ~] = atmoscoesa(height_init);
@@ -13,48 +15,12 @@ height_init = 1;
 Mach_init = 8;
 V_init = a*Mach_init;
 
-launch_angle = deg2rad(18.5); %20 for virginia, 17 for Ice Cream Cone, 18.5 for HARV
+launch_angle = vehicleProperties.launch_angle; 
 x_init = 0;
 
 state0 = [V_init; launch_angle; height_init; x_init];
 
-dt = .01; %s
-
-%{
-CL_vec_file = "Virginia_blended_CL.csv";
-CD_vec_file = "Virginia_blended_CD.csv";
-Trajectory_Save_File = "Virginia_Trajectory.csv";
-
-Sref_lift = .439; %m^2
-Sref_drag = .035; %m^2
-%}
-
-%{
-CL_vec_file = "Ice_Cream_Cone_blended_CL.csv";
-CD_vec_file = "Ice_Cream_Cone_blended_CD.csv";
-Trajectory_Save_File = "Ice_Cream_Cone_Trajectory.csv";
-
-Sref_lift = .253; %m^2
-Sref_drag = .0299; %m^2 
-%}
-
-%{
-CL_vec_file = "HARV_blended_CL.csv";
-CD_vec_file = "HARV_blended_CD.csv";
-Trajectory_Save_File = "HARV_Trajectory.csv";
-
-Sref_lift = .359; %m^2
-Sref_drag = .029; %m^2
-%}
-
-CL_vec_file = "Bunny_Bomb_blended_CL.csv";
-CD_vec_file = "Bunny_Bomb_blended_CD.csv";
-Trajectory_Save_File = "Bunny_Bomb_Trajectory.csv";
-
-Sref_lift = .467; %m^2
-Sref_drag = .049; %m^2
-
-[t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file, Sref_lift, Sref_drag);
+[t, state, usefulData] = RK4_3DoF(state0, vehicleProperties);
 
 %sometimes final row will have NaN's due to certain values going
 %negative or something, if this happens just remove the last row
@@ -126,18 +92,31 @@ xlabel('Time (s)')
 ylabel('Mach Number')
 title('Mach Number vs. Time')
 
+figure()
+plot(t, usefulData(6, :), 'LineWidth', 1, 'Color', 'Blue')
+xlabel('Time (s)')
+ylabel('Wall Temperature (K)')
+title('Wall Temperature vs. Time')
+
+figure()
+plot(t, usefulData(7, :), 'LineWidth', 1, 'Color', 'Blue')
+xlabel('Time (s)')
+ylabel('Internal Temperature (K)')
+title('Internal Temperature vs. Time')
 
 disp("Final Results: ")
 disp("Total Time: " + t(end) + " s")
 disp("Total Distance: " + state(4, end) + " m")
 disp("Maximum Height: " + max(state(3, :)) + " m")
 disp("Landing Mach Number: " + usefulData(5, end))
+disp("Maximum Wall Temperature: " + max(usefulData(6, :)) + " K")
+disp("Maximum Internal Temperature: " + max(usefulData(7, :)) + " K")
 
 saveArray = [t' state' usefulData'];
 
 saveTable = array2table(saveArray, 'VariableNames', {'Time', ...
-    'Velocity', 'Flight Path Angle', 'Height', ...
-    'Distance', 'Angle of Attack', 'CL', 'CD', ...
-    'Density', 'Mach Number'});
+    'Velocity', 'FlightPathAngle', 'Height', ...
+    'Distance', 'AngleOfAttack', 'CL', 'CD', ...
+    'Density', 'Mach Number', 'WallTemperature', 'InternalTemperature'});
 
 writetable(saveTable, Trajectory_Save_File);

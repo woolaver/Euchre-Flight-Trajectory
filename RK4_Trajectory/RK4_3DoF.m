@@ -1,30 +1,29 @@
-function [t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file, Sref_lift, Sref_drag)
+function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 %Same physics as ODE model but using RK4 because ODE45 sucks, also all ODE
 %models are combined into this one so the whole trajectory can be ran at
 %once
 %Inputs:
 %   state0: initial state of phase to run (V, gamma, h, x)
-%   dt: time step to run
-%   CL_vec_file: file to use for CL values
-%   CD_vec_file: file to use for CD values
-%   Sref_lift: reference area to use for lift (bottom surface)
-%   Sref_drag: reference area to use for drag (maximum cross-sectional area
-%   in axial direction)
+%   vehicleProperties: struct containing all vehicle properties needed
+%   (dt, CL_vec, CD_vec, Sref, length, height, m_skin, m_structure, thermal
+%   coefficients, ...)
 %Outputs:
 %   t: time vector (1xN)
 %   state: state array (4xN)
-%   usefulData: Vector containing angle of attack (rad), CL, CD, rho, and Mach vector (5xN)
+%   usefulData: Array containing angle of attack (rad), CL, CD, rho, Mach, Wall Temperature, and Internal Temperature (7xN)
+    
+    dt = vehicleProperties.dt;
     
     climb_end = 0;
     cruise_end = 1;
     state(:, 1) = state0;
     t(1) = 0;
 
-    m = 120; %kg
+    m = vehicleProperties.m; 
     g = 9.8; %m/s^2
 
-    CL_vec = readmatrix(CL_vec_file);
-    CD_vec = readmatrix(CD_vec_file);
+    CL_vec = readmatrix(vehicleProperties.CL_vec_file);
+    CD_vec = readmatrix(vehicleProperties.CD_vec_file);
 
     %populate first column of usefulData
     [~, a, ~, rho] = atmoscoesa(state0(3));
@@ -34,22 +33,28 @@ function [t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file,
     %assume CL and CD are 0 for the first input
     CL = 0;
     CD = 0;
+
+    Tw = vehicleProperties.Tw; %K, room temperature starting temperature
+    T_int = vehicleProperties.T_int; %K, room temperature starting temperature
+
+    alpha_climb = vehicleProperties.alpha_climb;
+    Sref = vehicleProperties.Sref;
+    length = vehicleProperties.length;
+    height = vehicleProperties.height;
     
-    usefulData(:, 1) = [0; CL; CD; rho; Mach];
+    usefulData(:, 1) = [0; CL; CD; rho; Mach; Tw; T_int];
 
     i = 1;
     
     while(climb_end == 0) 
 
-         disp(state(3, i))
+        disp(state(3, i))
 
         [~, a, ~, rho] = atmoscoesa(state(3, i));
         Mach = state(1, i)/a;
     
         %for now hard set alpha constant during climb
-        %4.75 for virginia, .5 for Ice Cream Cone, 0 for HARV, 3 for Bunny Bomb 
-
-        alpha = deg2rad(3);
+        alpha = alpha_climb;
 
         %alpha_vec and Mach_vec must be the same size and steps used to
         %create CL_vec_file and CD_vec_file for interpolation to work
@@ -69,8 +74,15 @@ function [t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file,
             disp("CD returned NaN, default value of .1 is used")
         end
 
-        D = 1/2*rho*state(1, i)^2*Sref_drag*CD;
-        L = 1/2*rho*state(1, i)^2*Sref_lift*CL;
+        D = 1/2*rho*state(1, i)^2*Sref*CD;
+        L = 1/2*rho*state(1, i)^2*Sref*CL;
+
+        [Fx, Fy, Q_conv_rate] = refTempMethod(length, height, state(3, i), Mach, alpha, Tw);
+
+        D = D + Fx;
+        L = L + Fy;
+
+        [Tw, T_int] = updateTemperatures(vehicleProperties, state(3, i), Tw, T_int, Q_conv_rate);
 
         %{
         state_dot = [-D/m - g*sin(state(2));
@@ -108,7 +120,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file,
 
         state(:, i+1) = state(:, i) + (dt./6).*(k1 + 2.*k2 + 2.*k3 + k4);
 
-        usefulData(:, i+1) = [alpha, CL, CD, rho, Mach];
+        usefulData(:, i+1) = [alpha, CL, CD, rho, Mach, Tw, T_int];
 
         t(i+1) = t(i)+dt;
 
@@ -123,7 +135,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file,
 
     i = i-1;
 
-    LD_vec = CL_vec./CD_vec;
+    %LD_vec = CL_vec./CD_vec;
 
     %logic variable to force projectile to enter glide at optimal L/D once
     %it first loses enough speed to hold altitude
@@ -157,11 +169,18 @@ function [t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file,
             alpha = findAlphaReq(CL_req, Mach, CL_vec);
         end
 
-        CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear');
-        CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear');
+        CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear', 'extrap');
+        CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear', 'extrap');
 
         D = 1/2*rho*state(1, i)^2*Sref_drag*CD;
         L = 1/2*rho*state(1, i)^2*Sref_lift*CL;
+
+        [Fx, Fy, Q_conv_rate] = refTempMethod(length, height, state(3, i), Mach, alpha, Tw);
+
+        D = D + Fx;
+        L = L + Fy;
+
+        [Tw, T_int] = updateTemperatures(vehicleProperties, state(3, i), Tw, T_int, Q_conv_rate);
 
         %{
         state_dot = [-D/m - g*sin(state(2));
@@ -199,7 +218,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, dt, CL_vec_file, CD_vec_file,
 
         state(:, i+1) = state(:, i) + (dt./6).*(k1 + 2.*k2 + 2.*k3 + k4);
 
-        usefulData(:, i+1) = [alpha, CL, CD, rho, Mach];
+        usefulData(:, i+1) = [alpha, CL, CD, rho, Mach, Tw, T_int];
 
         t(i+1) = t(i)+dt;
 

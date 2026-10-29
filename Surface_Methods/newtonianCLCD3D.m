@@ -1,4 +1,4 @@
-function [CL, CD, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alpha, minf, sref_lift, sref_drag, gamma)
+function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alpha, minf, Sref, gamma)
 % NEWTONIANCLCD3D Modified Newtonian Theory over a full 3D STL mesh
 %
 % Inputs:
@@ -27,11 +27,10 @@ function [CL, CD, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alpha, minf, sr
 
 TR = stlread(stlFile);
 
-% if(stlFile == "Virginia.stl" || stlFile == "Bunny_Bomb - Revolve2.stl"|| stlFile == 'N:\dotfiles\Desktop\euchre\blend_sharp.STL')
-if(stlFile == "HARV.stl" || stlFile == "Ice_Cream_Cone.stl")
-    V = TR.Points./1000; %Use for HARV/Ice Cream Cone 
+if(stlFile == "csv_files/Virginia.STL" || stlFile == "csv_files/Bunny_Bomb - Revolve2.STL")
+    V = TR.Points; %Use for Bunny_Bomb/Virgina
 else
-    V = TR.Points; %Use for Bunny_Bomb/Virgina/etc
+    V = TR.Points./1000; %Use for HARV/Ice Cream Cone/Blend bodies
 end
 F = TR.ConnectivityList;
 
@@ -46,11 +45,14 @@ centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
 
 %currently set so that nose is pointing in positive z direction because
 %thats what trevor did for some reason
-Vinf = [0, -sin(alpha), -cos(alpha)];
+if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL")
+    Vinf = [0, -sin(alpha), -cos(alpha)];
+else
+    Vinf = [0, -sin(alpha), cos(alpha)];
+end
 
 sinTheta = n * Vinf';             % Nf x 1
 Cp = zeros(size(sinTheta));
-
 
 p_pinf = (((gamma+1)^2*minf^2)/((4*gamma*minf^2) - 2*(gamma - 1)))^(gamma/(gamma-1))*((1-gamma+(2*gamma*minf^2))/(gamma+1)); 
 CpMax = 2/(gamma*minf^2)*(p_pinf - 1);
@@ -69,10 +71,17 @@ x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
 x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
 
 
-Fx = Ftotal(3);              % axial
-Fz =  Ftotal(2);              % normal
-L  = Fz*cos(alpha) - Fx*sin(alpha);
-D  = Fz*sin(alpha) + Fx*cos(alpha);
-CL = L / sref_lift;
-CD = D / sref_lift;
+if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL")
+    CA = Ftotal(3) / Sref;
+    CY = Ftotal(1) / Sref;
+    CN = Ftotal(2) / Sref;
+else
+    CA = -Ftotal(3) / Sref;
+    CY = Ftotal(1) / Sref;
+    CN = Ftotal(2) / Sref;
+end
+
+CL = CN*cos(alpha) - CA*sin(alpha);
+CD = CN*sin(alpha) + CA*cos(alpha);
+
 end

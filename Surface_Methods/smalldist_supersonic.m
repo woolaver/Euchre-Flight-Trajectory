@@ -1,13 +1,12 @@
-function [CL, CD, Cp, theta, centroid, x_cp] = smalldist_supersonic(stlFile, alpha, minf, sref_lift, sref_drag,y)
+function [CL, CD, Cx, Cz, Cy, Cp, theta, centroid, x_cp] = smalldist_supersonic(stlFile, alpha, minf, sref, y)
 %The aim of this script is to make a low fidelity solver for supersonic 
 %will miss blunt edges correct later
 TR = stlread(stlFile);
 
-% if(stlFile == "Virginia.stl" || stlFile == "Bunny_Bomb - Revolve2.stl"|| stlFile == 'N:\dotfiles\Desktop\euchre\blend_sharp.STL')
-if(stlFile == "HARV.stl" || stlFile == "Ice_Cream_Cone.stl")
-    V = TR.Points./1000; %use for harv ice cream
+if(stlFile == "csv_files/Virginia.STL" || stlFile == "csv_files/Bunny_Bomb - Revolve2.STL")
+    V = TR.Points; %Use for Bunny_Bomb/Virgina
 else
-    V = TR.Points; %Use for Bunny_Bomb/Virgina/etc
+    V = TR.Points./1000; %Use for HARV/Ice Cream Cone
 end
 
 F = TR.ConnectivityList;
@@ -23,14 +22,15 @@ dA = sqrt(sum(areaVec.^2, 2));   % Nf x 1, true triangle areas
 %get center point coordinate for each panel
 centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
 
-
-
-
 % Vinf = [cos(alpha), 0, sin(alpha)]; % 1x3 da vector for velocity
-vinf = [0, -sin(alpha), -cos(alpha)];
 
-s = min(max(n * vinf', -1), 1);
-theta = asin(s);       %nfx1 this is dot product between normals and the velocity vector to find theta    
+if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL")
+    vinf = [0, -sin(alpha), -cos(alpha)];
+else
+    vinf = [0, -sin(alpha), cos(alpha)];
+end
+
+theta = asin(n * vinf');        %nfx1 this is dot product between normals and the velocity vector to find theta    
 Cp = 2.*theta./(sqrt(minf.^2-1));
 
 %still feel a little sus about this
@@ -56,16 +56,17 @@ x_axial = centroid(:,3);
 x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
 x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
 
-% Cx = -Ftotal(3) / sref_drag;  %forces in x direction, nose to tail should be 1
-% Cy = Ftotal(1) / sref_drag;      %forces in y drection, out wing,  shouldnt need this should be 2
-% Cz = Ftotal(2) / sref_lift;    %forces in z, up should be 3 but bunny bomb is cooked
+if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL")
+    Cx = Ftotal(3) / sref;  %forces in x direction, nose to tail should be 1
+    Cy = Ftotal(1) / sref;  %forces in y drection, out wing,  shouldnt need this should be 2
+    Cz = Ftotal(2) / sref;  %forces in z, up should be 3 but bunny bomb is cooked
+else
+    Cx = -Ftotal(3) / sref;  %forces in x direction, nose to tail should be 1
+    Cy = Ftotal(1) / sref;   %forces in y drection, out wing,  shouldnt need this should be 2
+    Cz = Ftotal(2) / sref;   %forces in z, up should be 3 but bunny bomb is cooked
+end
 
-Fx = Ftotal(3);              % axial
-Fz =  Ftotal(2);              % normal
-L  = Fz*cos(alpha) - Fx*sin(alpha);
-D  = Fz*sin(alpha) + Fx*cos(alpha);
-CL = L / sref_lift;
-CD = D / sref_lift;
-
+CL = Cz*cos(alpha) - Cx*sin(alpha);
+CD = Cz*sin(alpha) + Cx*cos(alpha);
 
 end

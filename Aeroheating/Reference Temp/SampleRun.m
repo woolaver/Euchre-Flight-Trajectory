@@ -10,12 +10,12 @@ traj.altitude = linspace(0000, 0000, 800);         % m, ascending
 traj.velocity = linspace(343*8, 343*3, 800);           % m/s, decelerating
 traj.alpha    = linspace(4, 4, 800);           % deg, example AoA history
 
-trajectory_data = readmatrix("Heating Trajectory.csv");
-trajectory_data = trajectory_data(:,1:(length(trajectory_data)-1));
-traj.time = trajectory_data(1, :);
-traj.velocity = trajectory_data(2,:);
-traj.alpha = rad2deg(trajectory_data(6,:));
-traj.altitude = trajectory_data(4,:);
+trajectory_data = readtable("Virginia_Trajectory.csv");
+%trajectory_data = trajectory_data(:,1:(length(trajectory_data)-1));
+traj.time = trajectory_data.Time;
+traj.velocity = trajectory_data.Velocity;
+traj.alpha = rad2deg(trajectory_data.AngleOfAttack);
+traj.altitude = trajectory_data.Height;
 
 %[~, max_alt_i] = max(traj.altitude);
 %i_dive = 700;
@@ -25,7 +25,7 @@ traj.altitude = trajectory_data(4,:);
 
 
 % --- Geometry (placeholder values -- update with actual vehicle data) ---
-geom.x          = 0.1;                  % m, station for the time-history run
+geom.x          = 0.5;                  % m, station for the time-history run
 geom.xStations  = linspace(0.1, 1, 100); % m, stations for the position-profile run
 geom.halfAngle  = 8;                    % deg, body half-angle (set to [] to skip shock calc)
 geom.emissivity = 0.85;                 % wall emissivity
@@ -52,5 +52,5 @@ resultsTime = hypersonicHeatFlux(traj, geom, mat, opts);
 
 %% Run 2: quantities vs. POSITION (0.1 to 1 m) at a single snapshot time
 opts.mode = 'position';
-opts.snapshotTime = 10;   % s, must lie within traj.time
+opts.snapshotTime = 1380;   % s, must lie within traj.time
 resultsPos = hypersonicHeatFlux(traj, geom, mat, opts);

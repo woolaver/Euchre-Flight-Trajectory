@@ -21,7 +21,7 @@ Cm_cg = zeros([length(Mach_vec), length(alpha_vec)]);
 
 for i = 1:length(Mach_vec)
     for j = 1:length(alpha_vec)
-        [CL, ~ , ~,x_cp] = blended_driver(stlFile, alpha_vec(j), Mach_vec(i), Sref_lift, Sref_drag, gamma);
+        [CL, ~ , ~, x_cp] = blended_driver(stlFile, alpha_vec(j), Mach_vec(i), Sref_lift, Sref_drag, gamma);
         Cm_cg(i, j) = -1*((x_cg - x_cp)/c) * CL;
     end
 end
