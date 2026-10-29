@@ -1,7 +1,7 @@
-function [Cl,Cd,Cp, x_cp]  = blended_driver(stlfile, alpha, minf, sref_lift, sref_drag,y)
+function [Cl,Cd,Cp, x_cp]  = blended_driver(stlfile, alpha, minf, sref,y)
     
-    [Cl_s, Cd_s, ~, ~, ~, Cp_s, theta_s, ~, x_cp_s] = smalldist_supersonic(stlfile, alpha, minf, sref_lift, sref_drag,y);
-    [Cl_n, Cd_n, ~, ~, ~, Cp_n, ~, x_cp_n] = newtonianCLCD3D(stlfile, alpha, minf, sref_lift,sref_drag, y);
+    [Cl_s, Cd_s, ~, ~, ~, Cp_s, theta_s, ~, x_cp_s] = smalldist_supersonic(stlfile, alpha, minf, sref,y);
+    [Cl_n, Cd_n, ~, ~, ~, Cp_n, ~, x_cp_n] = newtonianCLCD3D(stlfile, alpha, minf,sref, y);
 
     %interpolation
     M1 = 3;   % below small dist
