@@ -10,7 +10,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 %Outputs:
 %   t: time vector (1xN)
 %   state: state array (4xN)
-%   usefulData: Array containing angle of attack (rad), CL, CD, rho, Mach, Wall Temperature, and Internal Temperature (7xN)
+%   usefulData: Array containing angle of attack (rad), CL, CD, rho, Mach, Wall Temperature, Internal Temperature, and Nose Temperature (8xN)
     
     dt = vehicleProperties.dt;
     
@@ -36,13 +36,14 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 
     Tw = vehicleProperties.Tw; %K, room temperature starting temperature
     T_int = vehicleProperties.T_int; %K, room temperature starting temperature
+    T_nose = vehicleProperties.T_nose; %K, room temperature starting temperature
 
     alpha_climb = vehicleProperties.alpha_climb;
     Sref = vehicleProperties.Sref;
     length = vehicleProperties.length;
     height = vehicleProperties.height;
     
-    usefulData(:, 1) = [0; CL; CD; rho; Mach; Tw; T_int];
+    usefulData(:, 1) = [0; CL; CD; rho; Mach; Tw; T_int; T_nose];
 
     i = 1;
     
@@ -78,11 +79,12 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
         L = 1/2*rho*state(1, i)^2*Sref*CL;
 
         [Fx, Fy, Q_conv_rate] = refTempMethod(length, height, state(3, i), Mach, alpha, Tw);
+        Q_conv_nose_rate = fayRiddellMethod(vehicleProperties, Mach, state(3, i), T_nose);
 
         D = D + Fx;
         L = L + Fy;
 
-        [Tw, T_int] = updateTemperatures(vehicleProperties, state(3, i), Tw, T_int, Q_conv_rate);
+        [Tw, T_int, T_nose] = updateTemperatures(vehicleProperties, state(3, i), Tw, T_int, T_nose, Q_conv_rate, Q_conv_nose_rate);
 
         %{
         state_dot = [-D/m - g*sin(state(2));
@@ -120,7 +122,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 
         state(:, i+1) = state(:, i) + (dt./6).*(k1 + 2.*k2 + 2.*k3 + k4);
 
-        usefulData(:, i+1) = [alpha, CL, CD, rho, Mach, Tw, T_int];
+        usefulData(:, i+1) = [alpha, CL, CD, rho, Mach, Tw, T_int, T_nose];
 
         t(i+1) = t(i)+dt;
 
@@ -172,15 +174,16 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
         CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear', 'extrap');
         CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear', 'extrap');
 
-        D = 1/2*rho*state(1, i)^2*Sref_drag*CD;
-        L = 1/2*rho*state(1, i)^2*Sref_lift*CL;
+        D = 1/2*rho*state(1, i)^2*Sref*CD;
+        L = 1/2*rho*state(1, i)^2*Sref*CL;
 
         [Fx, Fy, Q_conv_rate] = refTempMethod(length, height, state(3, i), Mach, alpha, Tw);
+        Q_conv_nose_rate = fayRiddellMethod(vehicleProperties, Mach, state(3, i), T_nose);
 
         D = D + Fx;
         L = L + Fy;
 
-        [Tw, T_int] = updateTemperatures(vehicleProperties, state(3, i), Tw, T_int, Q_conv_rate);
+        [Tw, T_int, T_nose] = updateTemperatures(vehicleProperties, state(3, i), Tw, T_int, T_nose, Q_conv_rate, Q_conv_nose_rate);
 
         %{
         state_dot = [-D/m - g*sin(state(2));
@@ -218,7 +221,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 
         state(:, i+1) = state(:, i) + (dt./6).*(k1 + 2.*k2 + 2.*k3 + k4);
 
-        usefulData(:, i+1) = [alpha, CL, CD, rho, Mach, Tw, T_int];
+        usefulData(:, i+1) = [alpha, CL, CD, rho, Mach, Tw, T_int, T_nose];
 
         t(i+1) = t(i)+dt;
 

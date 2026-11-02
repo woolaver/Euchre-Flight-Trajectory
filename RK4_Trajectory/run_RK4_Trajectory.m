@@ -104,6 +104,12 @@ xlabel('Time (s)')
 ylabel('Internal Temperature (K)')
 title('Internal Temperature vs. Time')
 
+figure()
+plot(t, usefulData(8, :), 'LineWidth', 1, 'Color', 'Blue')
+xlabel('Time (s)')
+ylabel('Internal Temperature (K)')
+title('Nose Temperature vs. Time')
+
 disp("Final Results: ")
 disp("Total Time: " + t(end) + " s")
 disp("Total Distance: " + state(4, end) + " m")
@@ -111,12 +117,15 @@ disp("Maximum Height: " + max(state(3, :)) + " m")
 disp("Landing Mach Number: " + usefulData(5, end))
 disp("Maximum Wall Temperature: " + max(usefulData(6, :)) + " K")
 disp("Maximum Internal Temperature: " + max(usefulData(7, :)) + " K")
+disp("Maximum Nose Temperature: " + max(usefulData(8, :)) + " K")
+
+Trajecotry_Save_File = vehicleProperties.Trajectory_Save_File;
 
 saveArray = [t' state' usefulData'];
 
 saveTable = array2table(saveArray, 'VariableNames', {'Time', ...
     'Velocity', 'FlightPathAngle', 'Height', ...
     'Distance', 'AngleOfAttack', 'CL', 'CD', ...
-    'Density', 'Mach Number', 'WallTemperature', 'InternalTemperature'});
+    'Density', 'Mach Number', 'WallTemperature', 'InternalTemperature', 'NoseTemperature'});
 
 writetable(saveTable, Trajectory_Save_File);
