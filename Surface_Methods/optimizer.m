@@ -5,7 +5,7 @@ catch
     swApp = actxserver('SldWorks.Application'); pause(5)
 end
 set(swApp, 'Visible', true);
-spec = invoke(swApp, 'GetOpenDocSpec', 'N:\dotfiles\Desktop\euchre\blend_sharp.SLDPRT');
+spec = invoke(swApp, 'GetOpenDocSpec', "N:\dotfiles\Desktop\euchre\opti.SLDPRT");
 set(spec, 'Silent', true);
 swModel = invoke(swApp, 'OpenDoc7', spec);
 
@@ -20,8 +20,8 @@ y = 1.15;%y as a function of mach
 
 %these are hard coded because it will be very annoying to actually nfind
 %these and they wont change that much
-sref_lift = .42;
-sref_drag = .03;
+sref = .52;
+
 
 
 
@@ -32,21 +32,21 @@ ainf =303; %speed of sound from standard atmosphere
 qinf = 0.5*rhoinf*(M*ainf)^2; % 
 
 %this gives the min required cl so it doesnt spaz out and give 0 cl and cd
-min_cl = weight/qinf/sref_lift;
+min_cl = weight/qinf/sref;
 
 
 %%
 %need to have a matrix with all the parameters I want to change
 %              
 %             'aft_heightFRAC','lowHT' 'bodyWD','bodyLG', 'humpLG %', 'humpWD','hmp_heightfrac', 'humpLowHT'];
-parameters_0 = [.6              .074     .3      1.5      .5          .23        1.2           .09 ];
+parameters_0 = [.6              .074     .25      1.5      .5          .23        1.2           .09 ];
 
 %%
 %need to have lb and ub for the parameters
 
-lb = [0   0.001   .15   1.25   .1    .1   .2   0.001 ];
+lb = [0   0.001    .15   1.25   .1    .1   .2   0.001 ];
 
-ub = [.7 .15  .38   2       .7    .33   1.35  .15 ];
+ub = [.7   .15     .4    2    .7    .33   1.35  .15 ];
 
 A = [0 0 -1 0 0 1 0 0];   % humpWD - bdyWD <= 0
 B = 0;
@@ -86,7 +86,7 @@ options = optimoptions('surrogateopt', ...
     'PlotFcn', 'surrogateoptplot', ...
     'InitialPoints', parameters_0);     
 
-fun = @(x) obj(x, swApp, swModel, alpha, M, sref_lift, sref_drag, y, min_cl);
+fun = @(x) obj(x, swApp, swModel, alpha, M, sref, y, min_cl);
 
 % test_out = fun(parameters_0);
 % disp(test_out.Ineq)
@@ -103,7 +103,7 @@ fun = @(x) obj(x, swApp, swModel, alpha, M, sref_lift, sref_drag, y, min_cl);
 %need to have an objective function which takes inputs, creates cad file,
 %runs the driver, and then spits out shit
 
-function out = obj(x, swApp, swModel, alpha, minf, sref_lift, sref_drag, y, min_cl)
+function out = obj(x, swApp, swModel, alpha, minf, sref, y, min_cl)
     out.Fval = 1e3;
     out.Ineq = [10;10];
 
@@ -112,7 +112,7 @@ function out = obj(x, swApp, swModel, alpha, minf, sref_lift, sref_drag, y, min_
     parameter_names = {'upHT','lowHT' 'bdyWD','bdyLG', 'humpLG', 'humpWD','humpUpHT', 'humpLowHT'};
     % parameter_names = {'bodyLG','noseLG','bodyWD','finWD','bodyHT'};
     R = .2;
-    min_height = .12;
+    min_height = .13;
     heightmax = R + sqrt(max(0, R^2 - (x(3)/2)^2));
     aft_height    = min_height-x(2) + x(1)*(heightmax - (min_height-x(2)));
     hmp_height = aft_height*x(7);
@@ -121,7 +121,7 @@ function out = obj(x, swApp, swModel, alpha, minf, sref_lift, sref_drag, y, min_
 
     parameter = [aft_height,x(2), x(3), x(4), x(5), x(6), hmp_height, x(8)];
 
-    outputFile = 'N:\dotfiles\Desktop\euchre\blend_sharp.STL';
+    outputFile = "N:\dotfiles\Desktop\euchre\opti.STL";
     if isfile(outputFile), delete(outputFile); end
 
     try
@@ -161,7 +161,7 @@ function out = obj(x, swApp, swModel, alpha, minf, sref_lift, sref_drag, y, min_
     ax = TR.Points(:, AX);
     cg_frac = (cg(AX)-min(ax) ) / (max(ax) - min(ax));     % 0 = nose, assuming nose at max end
 
-    [Cl,Cd,~,x_cp_frac] = blended_driver(outputFile, alpha, minf, sref_lift, sref_drag, y);
+    [Cl,Cd,~,x_cp_frac] = blended_driver(outputFile, alpha, minf, sref, y);
     if ~isfinite(Cl) || ~isfinite(Cd) || Cd <= 0 || ~isfinite(x_cp_frac)
         fprintf('FAIL: bad solve  Cl=%g Cd=%g x_cp=%g\n', Cl, Cd, x_cp_frac); return
     end

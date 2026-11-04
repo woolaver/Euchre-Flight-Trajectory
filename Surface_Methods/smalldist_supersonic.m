@@ -3,7 +3,7 @@ function [CL, CD, Cx, Cz, Cy, Cp, theta, centroid, x_cp] = smalldist_supersonic(
 %will miss blunt edges correct later
 TR = stlread(stlFile);
 
-if(stlFile == "csv_files/Virginia.STL" || stlFile == "csv_files/Bunny_Bomb - Revolve2.STL")
+if(stlFile == "csv_files/Virginia.STL" || stlFile == "csv_files/Bunny_Bomb - Revolve2.STL"|| stlFile == "csv_files/blend_sharp.STL"|| stlFile == "csv_files/halfcone113.STL"|| stlFile == "N:\dotfiles\Desktop\euchre\opti.STL")
     V = TR.Points; %Use for Bunny_Bomb/Virgina
 else
     V = TR.Points./1000; %Use for HARV/Ice Cream Cone
@@ -24,7 +24,7 @@ centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
 
 % Vinf = [cos(alpha), 0, sin(alpha)]; % 1x3 da vector for velocity
 
-if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL")
+if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL"|| stlFile == "csv_files/halfcone113.STL"|| stlFile == "N:\dotfiles\Desktop\euchre\opti.STL")
     vinf = [0, -sin(alpha), -cos(alpha)];
 else
     vinf = [0, -sin(alpha), cos(alpha)];

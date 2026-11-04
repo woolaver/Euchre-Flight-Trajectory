@@ -27,7 +27,7 @@ function [CL, CD, CA, CN, CY, Cp, sinTheta, x_cp] = newtonianCLCD3D(stlFile, alp
 
 TR = stlread(stlFile);
 
-if(stlFile == "csv_files/Virginia.STL" || stlFile == "csv_files/Bunny_Bomb - Revolve2.STL")
+if(stlFile == "csv_files/Virginia.STL" || stlFile == "csv_files/Bunny_Bomb - Revolve2.STL"|| stlFile == "csv_files/blend_sharp.STL" || stlFile == "csv_files/halfcone113.STL"|| stlFile == "N:\dotfiles\Desktop\euchre\opti.STL")
     V = TR.Points; %Use for Bunny_Bomb/Virgina
 else
     V = TR.Points./1000; %Use for HARV/Ice Cream Cone/Blend bodies
@@ -45,7 +45,7 @@ centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
 
 %currently set so that nose is pointing in positive z direction because
 %thats what trevor did for some reason
-if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL")
+if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL"|| stlFile == "csv_files/halfcone113.STL"|| stlFile == "N:\dotfiles\Desktop\euchre\opti.STL")
     Vinf = [0, -sin(alpha), -cos(alpha)];
 else
     Vinf = [0, -sin(alpha), cos(alpha)];
