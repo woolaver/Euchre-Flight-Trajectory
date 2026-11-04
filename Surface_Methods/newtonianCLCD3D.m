@@ -71,7 +71,7 @@ x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
 x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
 
 
-if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL")
+if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL"|| stlFile == "csv_files/halfcone113.STL"|| stlFile == "N:\dotfiles\Desktop\euchre\opti.STL")
     CA = Ftotal(3) / Sref;
     CY = Ftotal(1) / Sref;
     CN = Ftotal(2) / Sref;
