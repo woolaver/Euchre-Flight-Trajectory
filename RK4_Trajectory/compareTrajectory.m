@@ -5,10 +5,10 @@ clear
 clc
 close all
 
-virginia_trajectory = readtable("Virginia_Trajectory.csv");
-ice_cream_cone_trajectory = readtable("Ice_Cream_Cone_Trajectory.csv");
-harv_trajectory = readtable("HARV_Trajectory.csv");
-bunny_bomb_trajectory = readtable("Bunny_Bomb_Trajectory.csv");
+virginia_trajectory = readtable("csv_files/Virginia_Trajectory.csv");
+ice_cream_cone_trajectory = readtable("csv_files/Ice_Cream_Cone_Trajectory.csv");
+harv_trajectory = readtable("csv_files/HARV_Trajectory.csv");
+bunny_bomb_trajectory = readtable("csv_files/Bunny_Bomb_Trajectory.csv");
 
 virginia_time = virginia_trajectory.Time;
 ice_cream_cone_time = ice_cream_cone_trajectory.Time;

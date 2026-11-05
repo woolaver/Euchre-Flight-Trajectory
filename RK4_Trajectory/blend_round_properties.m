@@ -36,9 +36,13 @@ function vehicleProperties = blend_round_properties()
     vehicleProperties.k_int = 130; %W/m*K, estimate for 7075-T6 Al, thermal conductivity of internal structure
 
     %trajectory properties
-    vehicleProperties.alpha_climb = deg2rad(0);
-    vehicleProperties.dt = .01; %sec
-    vehicleProperties.launch_angle = deg2rad(18.5);
+    vehicleProperties.alpha_climb = deg2rad(1);
+    vehicleProperties.dt = .1; %sec
+    vehicleProperties.launch_angle = deg2rad(50);
+    vehicleProperties.alpha_glide = deg2rad(0);
+    vehicleProperties.alpha_dive = deg2rad(-5);
+    vehicleProperties.alpha_level = deg2rad(-17);
+    vehicleProperties.dive_speed = 1200;
 
     %nose properties
     vehicleProperties.R_nose = .0595; %m
