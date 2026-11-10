@@ -10,7 +10,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 %Outputs:
 %   t: time vector (1xN)
 %   state: state array (4xN)
-%   usefulData: Array containing angle of attack (rad), CL, CD, rho, Mach, Wall Temperature, Internal Temperature, and Nose Temperature (8xN)
+%   usefulData: Array containing body angle of attack (rad), fin angle of attack (rad), CL, CD, rho, Mach, Wall Temperature, Internal Temperature, and Nose Temperature (9xN)
     
     dt = vehicleProperties.dt;
     
@@ -42,7 +42,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
     length = vehicleProperties.length;
     height = vehicleProperties.height;
     
-    usefulData(:, 1) = [0; CL; CD; rho; Mach; Tw; T_int; T_nose];
+    usefulData(:, 1) = [0; 0; CL; CD; rho; Mach; Tw; T_int; T_nose];
 
     i = 1;
 
@@ -87,6 +87,11 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 
         D = D + Fx;
         L = L + Fy;
+
+        [trimDrag, trimLift, alpha_fin] = calcTrimDrag(vehicleProperties, alpha, L, D, state(3, i), Mach);
+
+        D = D + trimDrag;
+        L = L + trimLift;
 
         [Tw, T_int, T_nose] = updateTemperatures(vehicleProperties, state(3, i), Tw, T_int, T_nose, Q_conv_rate, Q_conv_nose_rate);
         
@@ -136,7 +141,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
             break;
         end
 
-        usefulData(:, i+1) = [alpha, CL, CD, rho, Mach, Tw, T_int, T_nose];
+        usefulData(:, i+1) = [alpha, alpha_fin, CL, CD, rho, Mach, Tw, T_int, T_nose];
 
         t(i+1) = t(i)+dt;
 
@@ -150,8 +155,6 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
     end
 
     i = i-1;
-
-    %LD_vec = CL_vec./CD_vec;
 
     %logic variable to force projectile to enter glide at optimal L/D once
     %it first loses enough speed to hold altitude
