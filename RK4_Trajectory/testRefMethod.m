@@ -8,7 +8,7 @@ close all
 length = 1.491; %m
 height = .126; %m
 alt = 1; %m
-alpha = deg2rad(0);
+alpha = deg2rad(12.5);
 M_inf = 8;
 T_wall = 298; %K, room temperature assumption at launch
 A = 1.679; %m^2
@@ -25,7 +25,9 @@ k_Al = 130; %W/m*K
 T_internal = 293; %K room temperature assumption at launch minus 5 to see conduction temperature change
 T_nose = 302; %K room temperature assumption at launch plus 5 to see conduction temperature change
 
-[Ffx, Ffy, Q_conv_rate] = refTempMethod(length, height, alt, M_inf, alpha, T_wall);
+[Ffx, Ffy, Q_conv_rate] = refTempMethod(length, height, alt, M_inf, alpha, T_wall)
+
+%%
 
 %test fayRiddell Method
 

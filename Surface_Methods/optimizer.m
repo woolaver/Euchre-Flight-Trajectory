@@ -14,8 +14,8 @@ swModel = invoke(swApp, 'OpenDoc7', spec);
 
 %%
 %need to have flight regime info
-M = 4.5;%Mach
-alpha=deg2rad(15);
+M = 4.2;%Mach
+alpha=deg2rad(20);
 y = 1.15;%y as a function of mach
 
 %these are hard coded because it will be very annoying to actually nfind
@@ -27,12 +27,12 @@ sref = .52;
 
 weight = 120*9.81;
 
-rhoinf = 0.458; % Freestream density from standard atmosphere @30k ft
-ainf =303; %speed of sound from standard atmosphere
+rhoinf = 0.018; % Freestream density from standard atmosphere @30km
+ainf =301; %speed of sound from standard atmosphere
 qinf = 0.5*rhoinf*(M*ainf)^2; % 
 
 %this gives the min required cl so it doesnt spaz out and give 0 cl and cd
-min_cl = weight/qinf/sref;
+min_cl = 1.2*weight/qinf/sref;
 
 
 %%
@@ -46,7 +46,7 @@ parameters_0 = [.6              .074     .25      1.5      .5          .23      
 
 lb = [0   0.001    .15   1.25   .1    .1   .2   0.001 ];
 
-ub = [.5   .15     .4    2    .7    .33   1.35  .15 ];
+ub = [.6   .15     .3    2    .7    .25   1.35  .15 ];
 
 A = [0 0 -1 0 0 1 0 0];   % humpWD - bdyWD <= 0
 B = 0;
@@ -113,7 +113,7 @@ function out = obj(x, swApp, swModel, alpha, minf, sref, y, min_cl)
     % parameter_names = {'bodyLG','noseLG','bodyWD','finWD','bodyHT'};
     R = .2;
     min_height = .13;
-    heightmax = R + sqrt(max(0, R^2 - (x(3)/2)^2));
+    heightmax = R + sqrt(max(0, R^2 - ((x(3)+.1)/2)^2));
     aft_height    = min_height-x(2) + x(1)*(heightmax - (min_height-x(2)));
     hmp_height = aft_height*x(7);
 
@@ -169,7 +169,7 @@ function out = obj(x, swApp, swModel, alpha, minf, sref, y, min_cl)
     fprintf('cg_frac=%.3f  x_cp_frac=%.3f  Cl=%.3g  Cd=%.3g  min_cl=%.4f\n', cg_frac, x_cp_frac, Cl, Cd, min_cl);
     fprintf('STL axial %.3f to %.3f m,  CG axial %.3f m\n', min(ax), max(ax), cg(AX));
     out.Fval = -Cl/Cd;
-    out.Ineq = [cg_frac - x_cp_frac-.2;
+    out.Ineq = [cg_frac - x_cp_frac-.15;
                 min_cl - Cl];
 end
 

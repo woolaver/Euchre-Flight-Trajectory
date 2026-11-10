@@ -18,11 +18,11 @@ function [Cl,Cd,Cp, x_cp]  = blended_driver(stlfile, alpha, minf, sref,y)
     x_cp = (1 - w).*x_cp_s + w.*x_cp_n;
 
     
-%     fprintf('Small Dist: Cl = %4f, Cd = %4f \n',Cl_s, Cd_s);
-%     fprintf('Newtonian: Cl = %4f, Cd = %4f \n',Cl_n, Cd_n);
-%     fprintf('Blended: Cl = %4f, Cd = %4f \n',Cl, Cd);
-%     % % 
-%     % % 
-%     plotVehicleCp3D(stlfile, Cp, rad2deg(theta_s) , false, [])
-% % 
+    % fprintf('Small Dist: Cl = %4f, Cd = %4f \n',Cl_s, Cd_s);
+    % fprintf('Newtonian: Cl = %4f, Cd = %4f \n',Cl_n, Cd_n);
+    % fprintf('Blended: Cl = %4f, Cd = %4f \n',Cl, Cd);
+    % % % 
+    % % % 
+    % plotVehicleCp3D(stlfile, Cp, rad2deg(theta_s) , false, [])
+
 end

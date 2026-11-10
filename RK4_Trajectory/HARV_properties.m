@@ -36,7 +36,20 @@ function vehicleProperties = HARV_properties()
     vehicleProperties.k_int = 130; %W/m*K, estimate for 7075-T6 Al, thermal conductivity of internal structure
 
     %trajectory properties
-    vehicleProperties.alpha_climb = deg2rad(0);
-    vehicleProperties.dt = .01; %sec
+    vehicleProperties.alpha_climb = deg2rad(2);
+    vehicleProperties.dt = .1; %sec
     vehicleProperties.launch_angle = deg2rad(18.5);
+    vehicleProperties.alpha_glide = deg2rad(20);
+    vehicleProperties.alpha_dive = deg2rad(0);
+
+    %nose properties
+    vehicleProperties.R_nose = .025; %m
+    vehicleProperties.A_nose = vehicleProperties.R_nose^2*pi/2; %m^2
+    vehicleProperties.k_nose = 30; %W/m*K
+    vehicleProperties.cp_nose = 1200; %J/kg*K, estimate for high temperatures
+    vehicleProperties.V_nose = vehicleProperties.R_nose^3 * (2/3) * pi; %estimated as hemisphere
+    vehicleProperties.m_nose = vehicleProperties.V_nose * 2800; %kg, estiamte of 2800 kg/m^3
+    vehicleProperties.emissivity_nose = .8; %SiC/SiC CMC estimate
+    vehicleProperties.D_nose = vehicleProperties.R_nose/2; %m^2, circular esimtate from R_nose
+    vehicleProperties.T_nose = 298; %K, initial nose temperature, room temperature
 end

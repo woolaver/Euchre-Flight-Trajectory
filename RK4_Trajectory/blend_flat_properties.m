@@ -36,7 +36,21 @@ function vehicleProperties = blend_flat_properties()
     vehicleProperties.k_int = 130; %W/m*K, estimate for 7075-T6 Al, thermal conductivity of internal structure
 
     %trajectory properties
-    vehicleProperties.alpha_climb = deg2rad(4);
-    vehicleProperties.dt = .01; %sec
-    vehicleProperties.launch_angle = deg2rad(18.5);
+    vehicleProperties.alpha_climb = deg2rad(1.1);
+    vehicleProperties.dt = .1; %sec
+    vehicleProperties.launch_angle = deg2rad(52);
+    vehicleProperties.alpha_glide = deg2rad(2.25);
+    vehicleProperties.alpha_dive = deg2rad(-1.5);
+    vehicleProperties.alpha_level = deg2rad(-14.5);
+    vehicleProperties.dive_speed = 1360;
+
+    %nose properties (nose properties are the same as blend flat)
+    vehicleProperties.R_nose = .01; %m
+    vehicleProperties.A_nose = 1.578*10^(-4); %m^2
+    vehicleProperties.k_nose = 30; %W/m*K
+    vehicleProperties.cp_nose = 1200; %J/kg*K, estimate for high temperatures
+    vehicleProperties.m_nose = .0059; %kg, estiamte of 2800 kg/m^3, volume calculated as hemisphere with radius R_nose
+    vehicleProperties.emissivity_nose = .8; %SiC/SiC CMC estimate
+    vehicleProperties.D_nose = .02; %m^2, circular esimtate from R_nose
+    vehicleProperties.T_nose = 298; %K, initial nose temperature, room temperature
 end

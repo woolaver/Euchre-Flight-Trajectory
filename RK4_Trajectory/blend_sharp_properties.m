@@ -22,7 +22,7 @@ function vehicleProperties = blend_sharp_properties()
     vehicleProperties.wall_thickness = .0254; %m, assuming 1 inch thickness for testing purpose, need structure for real value
     
     %mass properties
-    vehicleProperties.m_skin = 60; %kg, initial estimate, will need structure for better estimate
+    vehicleProperties.m_skin = 58.7647; %kg, initial estimate, will need structure for better estimate
     vehicleProperties.m_structure = 50; %kg, intitial estimate, will need structure for better estimate
     vehicleProperties.m = 120; %kg, total mass
     
@@ -36,7 +36,22 @@ function vehicleProperties = blend_sharp_properties()
     vehicleProperties.k_int = 130; %W/m*K, estimate for 7075-T6 Al, thermal conductivity of internal structure
 
     %trajectory properties
-    vehicleProperties.alpha_climb = deg2rad(4);
-    vehicleProperties.dt = .01; %sec
-    vehicleProperties.launch_angle = deg2rad(18.5);
+    vehicleProperties.alpha_climb = deg2rad(3);
+    vehicleProperties.dt = .1; %sec
+    vehicleProperties.launch_angle = deg2rad(50);
+    vehicleProperties.alpha_glide = deg2rad(12.5);
+    vehicleProperties.alpha_dive = deg2rad(-3);
+    vehicleProperties.alpha_level = deg2rad(-15.2);
+    vehicleProperties.dive_speed = 1200;
+
+    %nose properties (nose properties are the same as blend round but
+    %R_nose is estimated to .01, not really sure what to do with it)
+    vehicleProperties.R_nose = .01; %m
+    vehicleProperties.A_nose = 1.578*10^(-4); %m^2
+    vehicleProperties.k_nose = 30; %W/m*K
+    vehicleProperties.cp_nose = 1200; %J/kg*K, estimate for high temperatures
+    vehicleProperties.m_nose = .0059; %kg, estiamte of 2800 kg/m^3, volume calculated as hemisphere with radius R_nose
+    vehicleProperties.emissivity_nose = .8; %SiC/SiC CMC estimate
+    vehicleProperties.D_nose = .02; %m^2, circular esimtate from R_nose
+    vehicleProperties.T_nose = 298; %K, initial nose temperature, room temperature
 end

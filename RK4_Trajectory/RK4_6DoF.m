@@ -52,7 +52,7 @@ function [t, state, usefulData] = RK4_6DoF(vehicleProperties, state0, dt)
     %alpha_vec and Mach_vec must be the same size and steps used to
     %create CL_vec_file and CD_vec_file for interpolation to work
     alpha_vec = deg2rad(linspace(-30, 30, 200));
-    Mach_vec = linspace(2, 8, 200);
+    Mach_vec = linspace(1.5, 9, 200); 
 
     %populate first column of usefulData
     [~, a, ~, rho] = atmoscoesa(state0(3));

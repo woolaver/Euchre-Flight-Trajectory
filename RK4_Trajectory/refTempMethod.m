@@ -51,9 +51,10 @@ function [Ffx, Ffy, Q_total] = refTempMethod(length, height, alt, M_inf, alpha, 
     upper_angle = rad2deg(half_angle - alpha);
     lower_angle = rad2deg(half_angle + alpha);
 
-    %if upper angle is positive then calcualte values, if negative then
+    %if upper angle is larger than 2.5 then calcualte values, if not then
     %assume friction force and heat flux is zero
-    if(upper_angle > 0)
+    %need to set to 2.5 for interp2 to handle cone table values
+    if(upper_angle > 2.5)
         %get edge states
         upper_p_ratio = interp2(cone_angle_vec, cone_mach_vec, cone_p_pinf, upper_angle, M_inf, 'linear');
         upper_T_ratio = interp2(cone_angle_vec, cone_mach_vec, cone_T_Tinf, upper_angle, M_inf, 'linear');
@@ -105,51 +106,56 @@ function [Ffx, Ffy, Q_total] = refTempMethod(length, height, alt, M_inf, alpha, 
 
     %lower surface
     %get edge states
-    lower_p_ratio = interp2(cone_angle_vec, cone_mach_vec, cone_p_pinf, lower_angle, M_inf, 'linear');
-    lower_T_ratio = interp2(cone_angle_vec, cone_mach_vec, cone_T_Tinf, lower_angle, M_inf, 'linear');
-    lower_rho_ratio = interp2(cone_angle_vec, cone_mach_vec, cone_rho_rhoinf, lower_angle, M_inf, 'linear');
-    M2_l = interp2(cone_angle_vec, cone_mach_vec, cone_M2, lower_angle, M_inf, 'linear');
-
-    pl_e = lower_p_ratio*p_inf;
-    Tl_e = lower_T_ratio*T_inf;
-    rhol_e = lower_rho_ratio*rho_inf;
-    ml_e = calcSutherlands(Tl_e);
-
-    Tw_Tl = Tw/Tl_e;
-    Tstar_l = Tl_e*(1 + .032*M2_l^2 + .58*(Tw_Tl - 1));
-
-    rhostar_l = pl_e/(R*Tstar_l);
-    mustar_l = calcSutherlands(Tstar_l);
-
-    a_l = sqrt(gamma*R*Tl_e);
-    ul_e = M2_l*a_l;
-
-    Rex_star_l = (rhostar_l.*ul_e.*x)./mustar_l;
-
-    %assuming laminar flow for now, will try later with turbulent flow to
-    %see if there are major differences
-    cf_star_l = .664./(sqrt(Rex_star_l));
-
-    q_inf_star_l = .5*rhostar_l*ul_e^2;
-
-    dx = x(2) - x(1);
-    disk_area_x = r_x.*pi.*dx; %Note: half the disk area because upper and lower surfaces added
-
-    friction_l = sqrt(3)*sum(cf_star_l(2:end).*disk_area_x(2:end).*q_inf_star_l);
+    if (lower_angle > 3)
+        lower_p_ratio = interp2(cone_angle_vec, cone_mach_vec, cone_p_pinf, lower_angle, M_inf, 'linear');
+        lower_T_ratio = interp2(cone_angle_vec, cone_mach_vec, cone_T_Tinf, lower_angle, M_inf, 'linear');
+        lower_rho_ratio = interp2(cone_angle_vec, cone_mach_vec, cone_rho_rhoinf, lower_angle, M_inf, 'linear');
+        M2_l = interp2(cone_angle_vec, cone_mach_vec, cone_M2, lower_angle, M_inf, 'linear');
+    
+        pl_e = lower_p_ratio*p_inf;
+        Tl_e = lower_T_ratio*T_inf;
+        rhol_e = lower_rho_ratio*rho_inf;
+        ml_e = calcSutherlands(Tl_e);
+    
+        Tw_Tl = Tw/Tl_e;
+        Tstar_l = Tl_e*(1 + .032*M2_l^2 + .58*(Tw_Tl - 1));
+    
+        rhostar_l = pl_e/(R*Tstar_l);
+        mustar_l = calcSutherlands(Tstar_l);
+    
+        a_l = sqrt(gamma*R*Tl_e);
+        ul_e = M2_l*a_l;
+    
+        Rex_star_l = (rhostar_l.*ul_e.*x)./mustar_l;
+    
+        %assuming laminar flow for now, will try later with turbulent flow to
+        %see if there are major differences
+        cf_star_l = .664./(sqrt(Rex_star_l));
+    
+        q_inf_star_l = .5*rhostar_l*ul_e^2;
+    
+        dx = x(2) - x(1);
+        disk_area_x = r_x.*pi.*dx; %Note: half the disk area because upper and lower surfaces added
+    
+        friction_l = sqrt(3)*sum(cf_star_l(2:end).*disk_area_x(2:end).*q_inf_star_l);
+        
+        %heat transfer
+        he_l = cp*Tl_e;
+        h_l = cp*Tw;
+        haw_l = he_l + r*(ul_e^2/2);
+    
+        CH_star_l = (.332./sqrt(Rex_star_l)).*(Pr^(-2/3));
+    
+        qw_star_l = CH_star_l.*rhostar_l.*ul_e.*(haw_l - h_l);
+    
+        Q_star_l = sqrt(3)*sum(qw_star_l(2:end).*disk_area_x(2:end));
+    else
+        friction_l = 0;
+        Q_star_l = 0;
+    end
 
     Ffx = friction_l*cos(deg2rad(lower_angle)) + friction_u*cos(deg2rad(upper_angle));
     Ffy = -friction_l*sin(deg2rad(lower_angle)) + friction_u*sin(deg2rad(upper_angle));
-
-    %heat transfer
-    he_l = cp*Tl_e;
-    h_l = cp*Tw;
-    haw_l = he_l + r*(ul_e^2/2);
-
-    CH_star_l = (.332./sqrt(Rex_star_l)).*(Pr^(-2/3));
-
-    qw_star_l = CH_star_l.*rhostar_l.*ul_e.*(haw_l - h_l);
-
-    Q_star_l = sqrt(3)*sum(qw_star_l(2:end).*disk_area_x(2:end));
 
     Q_total = Q_star_l + Q_star_u;
 end

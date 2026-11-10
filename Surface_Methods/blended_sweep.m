@@ -5,18 +5,19 @@ clear
 clc
 close all
 
-%stlfile = 'csv_files/Virginia.STL';
+stlfile = 'csv_files/Virginia.STL';
 %stlfile = 'csv_files/HARV.STL';
 %stlfile = 'csv_files/Ice_Cream_Cone_STL.STL';
-stlfile = 'csv_files/Bunny_Bomb - Revolve2.STL';
+%stlfile = 'csv_files/Bunny_Bomb - Revolve2.STL';
 %stlfile = 'csv_files/blend_sharp.STL';
 %stlfile = 'csv_files/blend_round.STL';
 %stlfile = 'csv_files/blend_flat.STL';
+%stlfile = 'csv_files/halfcone113.STL';
 
 %helper function to ensure .stl file is correct
 %plotSTLRaw(geometry, true)
 
-M_inf = linspace(2, 8, 200);
+M_inf = linspace(1.5, 9, 200);
 alpha = deg2rad(linspace(-30, 30, 200));
 
 CL_vec = zeros([200, 200]);
@@ -25,7 +26,7 @@ CD_vec = zeros([200, 200]);
 gamma = 1.4;
 
 % Virginia
-%sref = .439; %m^2, take flat surface
+sref = .439; %m^2, take flat surface
 
 %HARV
 %sref = .359; %m^2
@@ -34,7 +35,7 @@ gamma = 1.4;
 %sref = .253; %m^2
 
 %Bunny Bomb
-sref = .467; %m^2
+%sref = .467; %m^2
 
 %Blend Sharp/Round
 %sref = .445; %m^2
@@ -42,6 +43,8 @@ sref = .467; %m^2
 %Blend Flat
 %sref = .637; %m^2
 
+%Half Cone
+%sref = .52;
 
 for i = 1:200
     disp(i)
@@ -66,8 +69,8 @@ for i = 1:200
     end
 end
 
-datafile_CL = "Bunny_Bomb_blended_CL.csv";
+datafile_CL = "Virginia_blended_CL.csv";
 writematrix(CL_vec, datafile_CL)
 
-datafile_CD = "Bunny_Bomb_blended_CD.csv";
+datafile_CD = "Virginia_blended_CD.csv";
 writematrix(CD_vec, datafile_CD)
