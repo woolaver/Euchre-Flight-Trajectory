@@ -56,7 +56,7 @@ x_axial = centroid(:,3);
 x_cp = sum(dF(:,2).*x_axial)./sum(dF(:,2));
 x_cp=(x_cp - min(x_axial))/(max(x_axial) - min(x_axial));
 
-if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL")
+if(stlFile == "csv_files/blend_flat.STL" || stlFile == "csv_files/blend_round.STL" || stlFile == "csv_files/blend_sharp.STL"|| stlFile == "csv_files/halfcone113.STL"|| stlFile == "N:\dotfiles\Desktop\euchre\opti.STL")
     Cx = Ftotal(3) / sref;  %forces in x direction, nose to tail should be 1
     Cy = Ftotal(1) / sref;  %forces in y drection, out wing,  shouldnt need this should be 2
     Cz = Ftotal(2) / sref;  %forces in z, up should be 3 but bunny bomb is cooked

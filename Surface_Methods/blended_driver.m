@@ -24,5 +24,5 @@ function [Cl,Cd,Cp, x_cp]  = blended_driver(stlfile, alpha, minf, sref,y)
 %     % % 
 %     % % 
 %     plotVehicleCp3D(stlfile, Cp, rad2deg(theta_s) , false, [])
-% 
+% % 
 end
