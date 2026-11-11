@@ -7,9 +7,9 @@ clc
 close all
 
 vehicleProperties = half_cone_properties();
-M_inf = 8;
-alpha_body = vehicleProperties.alpha_climb;
-alt = 0;
+M_inf = 3;
+alpha_body = deg2rad(20);%vehicleProperties.alpha_climb;
+alt = 30000;
 
 [~, a_inf, ~, rho_inf] = atmoscoesa(alt);
 V_inf = M_inf*a_inf;
