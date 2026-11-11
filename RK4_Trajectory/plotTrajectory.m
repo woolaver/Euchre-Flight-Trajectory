@@ -6,7 +6,7 @@ close all
 
 vehicleProperties = half_cone_properties();
 
-trajectoryData = readtable('csv_files\Half_Cone_Trajectory.csv');
+trajectoryData = readtable('csv_files/Half_Cone_Trajectory.csv');
 
 time = trajectoryData.Time;
 velocity = trajectoryData.Velocity;
@@ -188,6 +188,6 @@ disp("Total Time: " + time(end) + " s")
 disp("Total Distance: " + distance(end) + " m")
 disp("Maximum Height: " + max(height) + " m")
 disp("Landing Mach Number: " + MachNumber(end))
-disp("Maximum Wall Temperature: " + max(wallTemperature(:)) + " K")
-disp("Maximum Internal Temperature: " + max(internalTemperature(:)) + " K")
-disp("Maximum Nose Temperature: " + max(noseTemperature(:)) + " K")
+disp("Impact Wall Temperature: " + wallTemperature(end) + " K")
+disp("Impact Internal Temperature: " + internalTemperature(end) + " K")
+disp("Impact Nose Temperature: " + noseTemperature(end) + " K")

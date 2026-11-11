@@ -4,7 +4,7 @@ clear
 clc
 close all
 
-vehicleProperties = blend_sharp_properties();
+vehicleProperties = half_cone_properties();
 
 height_init = 1;
 

@@ -36,13 +36,13 @@ function vehicleProperties = half_cone_properties()
     vehicleProperties.k_int = 130; %W/m*K, estimate for 7075-T6 Al, thermal conductivity of internal structure
 
     %trajectory properties
-    vehicleProperties.alpha_climb = deg2rad(3.6);
+    vehicleProperties.alpha_climb = deg2rad(3);
     vehicleProperties.dt = .1; %sec
     vehicleProperties.launch_angle = deg2rad(50);
-    vehicleProperties.alpha_glide = deg2rad(10);
-    vehicleProperties.alpha_dive = deg2rad(-4);
-    vehicleProperties.alpha_level = deg2rad(-17);
-    vehicleProperties.dive_speed = 1250;
+    vehicleProperties.alpha_glide = deg2rad(12.5);
+    vehicleProperties.alpha_dive = deg2rad(-3);
+    vehicleProperties.alpha_level = deg2rad(-15.2);
+    vehicleProperties.dive_speed = 1225;
 
     %nose properties (nose properties are the same as blend round but
     %R_nose is estimated to .01, not really sure what to do with it)
@@ -54,4 +54,14 @@ function vehicleProperties = half_cone_properties()
     vehicleProperties.emissivity_nose = .8; %SiC/SiC CMC estimate
     vehicleProperties.D_nose = .02; %m^2, circular esimtate from R_nose
     vehicleProperties.T_nose = 298; %K, initial nose temperature, room temperature
+
+    %fin properties
+    vehicleProperties.fin_x_location = .4820; %1/4 body length from the nose
+    vehicleProperties.fin_y_location = .094; %distance from vehicle edge to the vehicle centerline
+    vehicleProperties.Sref_fin = .042; %m^2
+    vehicleProperties.fin_thickness = .02; %m, estimated fin thickness for diamond airfoil, results in half angle of 5.7124
+    vehicleProperties.fin_length = .2; %m, assuming rectangular planform
+    vehicleProperties.fin_width = .1; %m, assuming rectangular planform
+    vehicleProperties.cg_x_location = vehicleProperties.length*.5; %estimating cg at half length
+    vehicleProperties.cp_x_location = vehicleProperties.length*.55; %estimating cp at .55 length, later on this should change with angle of attack but fine for testing rn
 end
