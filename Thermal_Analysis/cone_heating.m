@@ -1,19 +1,34 @@
-function cone_heating(stlFile,trajectory,kval,thick)
-%cone heating from stl file of nosecone
+function cone_heating(stlFile, trajectory,kval,thick)
+%cone heating from stl file of nosecone assuming that nose cone can be
+%treated as a lumped system and doesnt use any dissasoiation for the
+%tangent wedge part
 %Inputs:
 %   stl file 
 %   trajectory 'Half_Cone_Trajectory'
-%   r = .1 %nose radius (m) ask adam
-%   kvalmatrix of
+%   kval matrix for each layer
+%   thickness matrix of layers
 %Outputs:
-%   Ffx: X-direction friction force (N)
-%   Ffy: Y-direction friction force (N)
-%   Q_tot: Total heat flux (W)
+%   t_n nose cone temp over time
+%   t_i structre temp over time
 
 %constants
 nosetip = [ 0 0 0]; %this is the cordinates of the tip
-R = insulation_calc
+surfacearea = _____; %surface area of nose cone
+cp_tung = 141; %j/kg*k
+m_n  = ____ %mass of nose
+cp_al = 896; %j/kg*k
+m_i  = ____ %mass of internal, probly just going nto do the mass of the nearest rib i guess
+R_ins = insulation_calc(kval,thick);
+r=.1; %nose cone radius
+backarea = _____;
 
+
+R= 287;
+sb = 5.67e-8; %stefanboltzman constant
+dt = .1;
+y=1.4;
+PR = .75;
+recovery  =sqrt(PR);
 
 %to get angles, straight claude
 TR = stlread(stlFile);
@@ -28,29 +43,53 @@ dA = sqrt(sum(areaVec.^2, 2));   % Nf x 1, true triangle areas
 %get center point coordinate for each panel
 centroid = (v1 + v2 + v3) / 3;  % Nf x 3 panel center coordinates
 
-%create a matrix for the surface temp to use at each prior step
-t_s_old = 298*ones(size(centroid))
+%find the distance from the nose to the centroid of each panel
+distance = sqrt((centroid(1)-nosetip(1)).^2+(centroid(2)-nosetip(2)).^2+(centroid(2)-nosetip(2)).^2);
+
+%create a variables for the temp to use at each prior step and to store fo over time
+t_n = zeros(size(trajectory,1),1); t_n(1)=298;%nose cone temp
+t_i = zeros(size(trajectory,1),1); t_i(1)=298;%internal temp
+
+
 %starting for loop to go though every timestep
-for i =1:size(trajectory,2)
+for i =2:size(trajectory,1)
 %getting data from trajectory
-alpha = trajectory(i,6);
-alt = trajectory(i,6);
-minf = trajectory(i,6);
+alpha = trajectory(i,6);%angle of attack in radians
+alt = trajectory(i,4);
+minf = trajectory(i,10);
 
 vinf = [0, -sin(alpha), -cos(alpha)];
 
 theta = asin(n * vinf');        %nfx1 this is dot product between normals and the velocity vector to find theta 
-q = size(theta); %this is a matrix of all the q's
-distance = sqrt((centroid(1)-nosetip(1)).^2+(centroid(2)-nosetip(2)).^2+(centroid(2)-nosetip(2)).^2);
+q = zeros(size(theta)); %this is a matrix of all the q's
 
-for j = 1:size(theta,2)
+for j = 1:size(theta,1)
     if theta(j)>deg2rad(85)  %basically if the wall is flat, use fayriddel to get
-    
+        q(j) = fayRiddellMethod(r, minf, alt, t_n(i-1);
+    elseif theta(j)<0
+        q(j)=0;
     else
+        a = tangent_wedge(minf,alt,theta(j));
+        tw_te = Tw/a.T;
+        tstar = a.T*(1 + .032*a.M^2 + .58*(tw_te - 1));
+        mustar = calcSutherlands(tstar);
+        rstar = a.p/R/tstar;
+        rex_star = rstar*a.ue*distance(j)/mustar;
+        ch = .332./sqrt(rex_star).*PR^(-2/3);
 
-
+        taw = recovery*.5*a.u^2+1004*a.T;
+        q(j) = ch*rstar*a.ue*(taw-cp*t_n(i-1));
     end
 
 end
+
+q_an = sum(q.*dA); %heat flux air to nose
+q_ni = (t_n(i-1)-t_i(i-1))/R_ins*backarea;  %heat flux nose to internal
+q_nrad = surfacearea*sb*t_n(i-1)^4; %radation heatflux from nose to air
+
+%update temps
+netq = q_an-q_ni-q_nrad;
+t_n(i) = t_n(i-1)+dt*netq/(m_n*cp_tung);
+t_i(i) = t_i(i-1)+dt*q_ni/(m_i*cp_al);
 
 end

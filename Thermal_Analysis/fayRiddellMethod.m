@@ -14,7 +14,8 @@ function [Q_stag_rate] = fayRiddellMethod(R, M_inf, alt, T_nose)
     gamma = 1.4;
 
 
-    [T_inf, ~, p_inf, rho_inf] = atmoscoesa(alt);
+    %[T_inf, ~, p_inf, rho_inf] = atmoscoesa(alt);
+     [rho_inf,p_inf,T_inf] = stdatmfull(h);
 
     %Normal Shock to get shock properties
     
