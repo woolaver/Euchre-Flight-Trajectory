@@ -1,0 +1,4 @@
+function k=  insulation_calc(kval,thick)
+%takes a matrix of k values and aq matrix of thicknesses
+
+end
