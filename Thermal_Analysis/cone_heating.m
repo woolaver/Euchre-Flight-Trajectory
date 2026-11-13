@@ -21,7 +21,7 @@ height = trajectory.Height;
 
 
 
-nosetip = [ 0 0 0]; %this is the cordinates of the tip
+nosetip = [0 0 0]; %this is the cordinates of the tip
 surfacearea = .018941; %exposed surface area of nose cone for radiation
 cp_tung = 141; %j/kg*k
 m_n  = 3.54; %mass of nose (kg)
