@@ -29,6 +29,10 @@ function [Tw_updated, T_int_updated, T_nose_updated] = updateTemperatures(vehicl
     m_skin = vehicleProperties.m_skin;
     cp_w = vehicleProperties.cp_w;
 
+    %Insulation Properties
+    k_insulation = vehicleProperties.k_insulation;
+    insulation_thickness = vehicleProperties.insulation_thickness;
+
     %Internal Properties
     m_int = vehicleProperties.m_structure;
     cp_int = vehicleProperties.cp_int;
@@ -46,19 +50,24 @@ function [Tw_updated, T_int_updated, T_nose_updated] = updateTemperatures(vehicl
     Q_rad_rate = emissivity*sigma*A*(Tw_curr^4 - T_env^4);
     
     %conductive heat transfer using steady state assumption for each time point
-    Q_cond_rate = (k_w*A*(Tw_curr - T_int_curr))/(wall_thickness);
+    R_wall = wall_thickness/(k_w*A);
+    R_insulation = insulation_thickness/(k_insulation*A);
+    R_body = R_wall + R_insulation;
+    Q_cond_rate = (Tw_curr - T_int_curr)/(R_body);
 
-    %nose conductive heat transfer
+    %nose radiative heat transfer
     Q_rad_nose_rate = emissivity_nose*sigma*A_nose*(T_nose_curr^4 - T_env^4);
 
     %conductive heat transfer between internal structure and nose
-    Q_cond_nose_rate = (k_nose*D_nose*(T_nose_curr - T_int_curr))/(R_nose);
+    Res_nose = nose_thickness/(k_nose*A_nose);
+    R_nose_total = Res_nose + R_insulation;
+    Q_cond_nose_rate = (T_nose_curr - T_int_curr)/(R_nose_total);
     
     Qw_total_rate = Q_conv_rate - Q_cond_rate - Q_rad_rate;
     Q_total_nose_rate = Q_conv_nose_rate - Q_cond_nose_rate - Q_rad_nose_rate;
     Q_int_total_rate = Q_cond_rate + Q_cond_nose_rate;
     
-    Qw_total = Qw_total_rate * dt;
+    Qw_total = Qw_total_rate*dt;
     Q_int_total = Q_int_total_rate*dt;
     Q_nose_total = Q_total_nose_rate*dt;
     

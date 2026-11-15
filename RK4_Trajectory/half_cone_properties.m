@@ -19,11 +19,11 @@ function vehicleProperties = half_cone_properties()
     vehicleProperties.length = 1.919; %m
     vehicleProperties.height = .189; %m, height is from center of vehicle to top point (radius for perfectly circular cross section)
     vehicleProperties.A = 1.252; %m^2, total surface area
-    vehicleProperties.wall_thickness = .0254; %m, assuming 1 inch thickness for testing purpose, need structure for real value
+    vehicleProperties.wall_thickness = .01; %m, assuming 1 inch thickness for testing purpose, need structure for real value
     
     %mass properties
-    vehicleProperties.m_skin = 58.7647; %kg, initial estimate, will need structure for better estimate
-    vehicleProperties.m_structure = 50; %kg, intitial estimate, will need structure for better estimate
+    vehicleProperties.m_skin = 75; %kg, initial estimate, will need structure for better estimate
+    vehicleProperties.m_structure = 35; %kg, intitial estimate, will need structure for better estimate
     vehicleProperties.m = 120; %kg, total mass
     
     %thermal properties
@@ -34,24 +34,26 @@ function vehicleProperties = half_cone_properties()
     vehicleProperties.emissivity = .4; % wall emissivity, estimate for TI6ALV4
     vehicleProperties.k_w = 7; %W/m*K, estimate for TI6ALV4, thermal conductivity of wall
     vehicleProperties.k_int = 130; %W/m*K, estimate for 7075-T6 Al, thermal conductivity of internal structure
+    vehicleProperties.k_insulation = .04; %J/kg*K, constant for now but should turn into a linear interpolation
+    vehicleProperties.insulation_thickness = .01; %m
 
     %trajectory properties
     vehicleProperties.alpha_climb = deg2rad(3);
     vehicleProperties.dt = .1; %sec
     vehicleProperties.launch_angle = deg2rad(50);
-    vehicleProperties.alpha_glide = deg2rad(12.5);
+    vehicleProperties.alpha_glide = deg2rad(20);
     vehicleProperties.alpha_dive = deg2rad(-3);
-    vehicleProperties.alpha_level = deg2rad(-15.2);
+    vehicleProperties.alpha_level = deg2rad(-13.3);
     vehicleProperties.dive_speed = 1225;
+    vehicleProperties.level_height = 15000;
 
-    %nose properties (nose properties are the same as blend round but
-    %R_nose is estimated to .01, not really sure what to do with it)
+    %nose properties
     vehicleProperties.R_nose = .01; %m
-    vehicleProperties.A_nose = 1.578*10^(-4); %m^2
-    vehicleProperties.k_nose = 30; %W/m*K
-    vehicleProperties.cp_nose = 1200; %J/kg*K, estimate for high temperatures
-    vehicleProperties.m_nose = .0059; %kg, estiamte of 2800 kg/m^3, volume calculated as hemisphere with radius R_nose
-    vehicleProperties.emissivity_nose = .8; %SiC/SiC CMC estimate
+    vehicleProperties.A_nose = .002717; %m^2
+    vehicleProperties.k_nose = 172; %W/m*K
+    vehicleProperties.cp_nose = 141; %J/kg*K, estimate for high temperatures
+    vehicleProperties.m_nose = 3.54; %kg
+    vehicleProperties.emissivity_nose = .23; %Tungsten estimate
     vehicleProperties.D_nose = .02; %m^2, circular esimtate from R_nose
     vehicleProperties.T_nose = 298; %K, initial nose temperature, room temperature
 

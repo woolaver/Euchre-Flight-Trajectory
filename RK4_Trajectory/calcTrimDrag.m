@@ -77,7 +77,7 @@ function [trimDrag, trimLift, alpha_fin] = calcTrimDrag(vehicleProperties, alpha
         end
 
         if(delta_alpha_fin < 1e-10)
-            disp("Some shit happened")
+            disp("calcTrimDrag tolerance not reached")
             break;
         end
     end

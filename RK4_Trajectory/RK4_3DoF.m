@@ -1,4 +1,4 @@
-function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
+function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties, tempOffset)
 %Same physics as ODE model but using RK4 because ODE45 sucks, also all ODE
 %models are combined into this one so the whole trajectory can be ran at
 %once
@@ -7,11 +7,22 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 %   vehicleProperties: struct containing all vehicle properties needed
 %   (dt, CL_vec, CD_vec, Sref, length, height, m_skin, m_structure, thermal
 %   coefficients, ...)
+%   tempOffset: temperature offset in K used to change density in sensitivity
+%   analysis, set to 0 to run nominal case, density is calculated from
+%   ideal gas law, rho = p/(R*(T + tempOffset))
 %Outputs:
 %   t: time vector (1xN)
 %   state: state array (4xN)
 %   usefulData: Array containing body angle of attack (rad), fin angle of attack (rad), CL, CD, rho, Mach, Wall Temperature, Internal Temperature, and Nose Temperature (9xN)
     
+    
+    disp("Launch Angle: " + rad2deg(vehicleProperties.launch_angle) + " deg")
+    disp("Alpha Climb: " + rad2deg(vehicleProperties.alpha_climb) + " deg")
+    disp("Level Height: " + vehicleProperties.level_height + " m")
+    disp("Alpha Level: " + rad2deg(vehicleProperties.alpha_level) + " deg")
+    disp("Dive Speed: " + vehicleProperties.dive_speed + " m/s")
+    disp("Alpha Dive: " + rad2deg(vehicleProperties.alpha_dive) + " deg")
+
     dt = vehicleProperties.dt;
     
     climb_end = 0;
@@ -21,12 +32,14 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 
     m = vehicleProperties.m; 
     g = 9.8; %m/s^2
+    R = 287; %J/kg*K
 
     CL_vec = readmatrix(vehicleProperties.CL_vec_file);
     CD_vec = readmatrix(vehicleProperties.CD_vec_file);
 
     %populate first column of usefulData
-    [~, a, ~, rho] = atmoscoesa(state0(3));
+    [T, a, p, ~] = atmoscoesa(state0(3));
+    rho = p/(R*(T + tempOffset));
         
     Mach = state(1, 1)/a;
 
@@ -56,11 +69,12 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
         disp("Height: " + state(3, i) + " m")
         disp("Velocity: " + state(1, i) + " m/s")
 
-        [~, a, ~, rho] = atmoscoesa(state(3, i));
+        [T, a, p, ~] = atmoscoesa(state(3, i));
+        rho = p/(R*(T + tempOffset));
         Mach = state(1, i)/a;
     
         %for now hard set alpha constant during climb
-        if (state(3, i) < 15000)
+        if (state(3, i) < vehicleProperties.level_height)
             alpha = vehicleProperties.alpha_climb;
         else
             alpha = vehicleProperties.alpha_level;
@@ -92,27 +106,13 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 
         D = D + trimDrag;
         L = L + trimLift;
-
+        
         [Tw, T_int, T_nose] = updateTemperatures(vehicleProperties, state(3, i), Tw, T_int, T_nose, Q_conv_rate, Q_conv_nose_rate);
         
         if(isnan(Tw))
             disp("Temperature Update Failed")
             break;
         end
-
-        %{
-        state_dot = [-D/m - g*sin(state(2));
-                 L/(m*state(1)) - (g/state(1))*cos(state(2));
-                 state(1)*sin(state(2));
-                 state(1)*cos(state(2))];
-        %}
-
-        %RK-4 iteration
-        %k1 = dt*f(t, yn)
-        %k2 = dt*f(t + dt/2, yn + k1/2)
-        %k3 = dt*f(t + dt/2, yn + k2/2)
-        %k4 = dt*f(t + dt, yn + k3)
-        %yn+1 = yn + dt/6(k1 + 2k2 + 2k3 + k4)
 
         k1 = [-D/m - g*sin(state(2, i));
                  L/(m*state(1, i)) - (g/state(1, i))*cos(state(2, i));
@@ -154,8 +154,6 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
         i = i+1;
     end
 
-    i = i-1;
-
     %logic variable to force projectile to enter glide at optimal L/D once
     %it first loses enough speed to hold altitude
     glide = 0;
@@ -168,13 +166,15 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
         disp("Height: " + state(3, i) + " m")
         disp("Velocity: " + state(1, i) + " m/s")
 
-        [~, a, ~, rho] = atmoscoesa(state(3, i));
+        [T, a, p, ~] = atmoscoesa(state(3, i));
+        rho = p/(R*(T + tempOffset));        
         Mach = state(1, i)/a;
         
         %attempt to hold cruise altitude as long as possible
-        CL_req = 2*g*m*cos(state(2, i))/(rho*state(1, i)^2*Sref);
+        L_req = g*m*cos(state(2, i));
 
-        CL_max = interp2(alpha_vec, Mach_vec, CL_vec, deg2rad(30), Mach, 'linear');
+        CL_max = interp2(alpha_vec, Mach_vec, CL_vec, deg2rad(20), Mach, 'linear');
+        L_max = (1/2)*rho*state(1, i)^2*Sref*CL_max;
         
         if (state(1, i) < vehicleProperties.dive_speed || dive == 1)
             if(dive == 0)
@@ -183,41 +183,55 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
             end
 
             if(state(2, i) <= deg2rad(-85))
-                %hold glide path angle
-                CL_req = (2*m*g*cos(state(2, i)))/(rho*state(1, i)^2*Sref);
-                if (CL_req > CL_max)
+                if (L_req > L_max)
                     alpha = 0;
+                    CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear');
+                    CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear');
+
+                    D = 1/2*rho*state(1, i)^2*Sref*CD;
+                    L = 1/2*rho*state(1, i)^2*Sref*CL;
+
+                    [trimDrag, trimLift, alpha_fin] = calcTrimDrag(vehicleProperties, alpha, L, D, state(3, i), Mach);
+
+                    L = L + trimLift;
+                    D = D + trimDrag;
                 else
-                    alpha = findAlphaReq(CL_req, Mach, CL_vec);
+                    [L, D, alpha, alpha_fin] = findAlphaReq(vehicleProperties, L_req, Mach, state(3, i));
                 end
             else
                 alpha = vehicleProperties.alpha_dive;
                 dive = 1;
                 glide = 0;
+
+                CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear');
+                CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear');
+
+                D = 1/2*rho*state(1, i)^2*Sref*CD;
+                L = 1/2*rho*state(1, i)^2*Sref*CL;
+
+                [trimDrag, trimLift, alpha_fin] = calcTrimDrag(vehicleProperties, alpha, L, D, state(3, i), Mach);
+
+                L = L + trimLift;
+                D = D + trimDrag;
             end
-        elseif((CL_req > CL_max) || glide == 1)
+
+        elseif((L_req > L_max) || glide == 1)
             alpha = vehicleProperties.alpha_glide;
             glide = 1;
+
+            CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear');
+            CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear');
+
+            D = 1/2*rho*state(1, i)^2*Sref*CD;
+            L = 1/2*rho*state(1, i)^2*Sref*CL;
+
+            [trimDrag, trimLift, alpha_fin] = calcTrimDrag(vehicleProperties, alpha, L, D, state(3, i), Mach);
+            
+            %L = L + trimLift;
+            %D = D + trimDrag;
         else
-            alpha = findAlphaReq(CL_req, Mach, CL_vec);
+            [L, D, alpha, alpha_fin] = findAlphaReq(vehicleProperties, L_req, Mach, state(3, i));
         end
-
-        %{
-        if(Mach < 4 || dive == 1)
-            alpha = vehicleProperties.alpha_dive;
-            dive = 1;
-            glide = 0;
-        else
-            glide = 1;
-            alpha = vehicleProperties.alpha_glide;
-        end
-        %}
-
-        CL = interp2(alpha_vec, Mach_vec, CL_vec, alpha, Mach, 'linear');
-        CD = interp2(alpha_vec, Mach_vec, CD_vec, alpha, Mach, 'linear');
-
-        D = 1/2*rho*state(1, i)^2*Sref*CD;
-        L = 1/2*rho*state(1, i)^2*Sref*CL;
 
         [Fx, Fy, Q_conv_rate] = refTempMethod(length, height, state(3, i), Mach, alpha, Tw);
         Q_conv_nose_rate = fayRiddellMethod(vehicleProperties, Mach, state(3, i), T_nose);
@@ -249,7 +263,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties)
 
         state(:, i+1) = state(:, i) + (dt./6).*(k1 + 2.*k2 + 2.*k3 + k4);
 
-        usefulData(:, i+1) = [alpha, CL, CD, rho, Mach, Tw, T_int, T_nose];
+        usefulData(:, i+1) = [alpha, alpha_fin, CL, CD, rho, Mach, Tw, T_int, T_nose];
 
         t(i+1) = t(i)+dt;
 
