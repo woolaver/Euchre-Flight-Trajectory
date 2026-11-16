@@ -1,4 +1,4 @@
-function [Q_stag_rate] = fayRiddellMethod(R, M_inf, alt, T_nose)
+function [Q_stag_rate] = fayRiddellMethod(vehicleProperties, M_inf, alt, T_nose)
 %Fay-Riddell Method to get stagnation point heating at nose of vehicle
 %Assuming equilibrium flow with a spherical nose 
 %All heat transfer will be assumed to convectivally transfer into the nose
@@ -11,8 +11,9 @@ function [Q_stag_rate] = fayRiddellMethod(R, M_inf, alt, T_nose)
 %Outputs:
 %   Q_stag_rate: Total heat transfer rate from stagnation heating
 
-    gamma = 1.4;
+    R = vehicleProperties.R_nose;
 
+    gamma = 1.4;
 
     %[T_inf, ~, p_inf, rho_inf] = atmoscoesa(alt);
      [rho_inf,p_inf,T_inf] = stdatmfull(alt);

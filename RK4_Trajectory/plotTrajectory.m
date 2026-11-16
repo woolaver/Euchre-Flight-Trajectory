@@ -6,14 +6,15 @@ close all
 
 vehicleProperties = half_cone_properties();
 
-trajectoryData = readtable('csv_files/Half_Cone_Trajectory.csv');
+trajectoryData = readtable('Half_Cone_Trajectory.csv');
 
 time = trajectoryData.Time;
 velocity = trajectoryData.Velocity;
 flightPathAngle = rad2deg(trajectoryData.FlightPathAngle);
 height = trajectoryData.Height;
 distance = trajectoryData.Distance;
-angleOfAttack = rad2deg(trajectoryData.AngleOfAttack);
+bodyAngleOfAttack = rad2deg(trajectoryData.BodyAngleOfAttack);
+finAngleOfAttack = rad2deg(trajectoryData.FinAngleOfAttack);
 CL = trajectoryData.CL;
 CD = trajectoryData.CD;
 density = trajectoryData.Density;
@@ -89,14 +90,26 @@ hold off
 
 figure()
 hold on
-plot(time, angleOfAttack, 'LineWidth', 1, 'Color', 'Blue')
-plot(time(climbEndIndex), angleOfAttack(climbEndIndex), 'o', 'LineWidth', 3)
-plot(time(levelEndIndex), angleOfAttack(levelEndIndex), 'o', 'LineWidth', 3)
-plot(time(glideEndIndex), angleOfAttack(glideEndIndex), 'o', 'LineWidth', 3)
-legend('Angle of Attack', 'Climb End', 'Level End', 'Glide End')
+plot(time, bodyAngleOfAttack, 'LineWidth', 1, 'Color', 'Blue')
+plot(time(climbEndIndex), bodyAngleOfAttack(climbEndIndex), 'o', 'LineWidth', 3)
+plot(time(levelEndIndex), bodyAngleOfAttack(levelEndIndex), 'o', 'LineWidth', 3)
+plot(time(glideEndIndex), bodyAngleOfAttack(glideEndIndex), 'o', 'LineWidth', 3)
+legend('Body Angle of Attack', 'Climb End', 'Level End', 'Glide End')
 xlabel('Time (s)')
-ylabel('Angle of Attack (deg)')
-title('Angle of Attack vs. Time')
+ylabel('Body Angle of Attack (deg)')
+title('Body Angle of Attack vs. Time')
+hold off
+
+figure()
+hold on
+plot(time, finAngleOfAttack, 'LineWidth', 1, 'Color', 'Blue')
+plot(time(climbEndIndex), finAngleOfAttack(climbEndIndex), 'o', 'LineWidth', 3)
+plot(time(levelEndIndex), finAngleOfAttack(levelEndIndex), 'o', 'LineWidth', 3)
+plot(time(glideEndIndex), finAngleOfAttack(glideEndIndex), 'o', 'LineWidth', 3)
+legend('Fin Angle of Attack', 'Climb End', 'Level End', 'Glide End')
+xlabel('Time (s)')
+ylabel('Fin Angle of Attack (deg)')
+title('Fin Angle of Attack vs. Time')
 hold off
 
 figure()
@@ -188,6 +201,6 @@ disp("Total Time: " + time(end) + " s")
 disp("Total Distance: " + distance(end) + " m")
 disp("Maximum Height: " + max(height) + " m")
 disp("Landing Mach Number: " + MachNumber(end))
-disp("Impact Wall Temperature: " + wallTemperature(end) + " K")
-disp("Impact Internal Temperature: " + internalTemperature(end) + " K")
-disp("Impact Nose Temperature: " + noseTemperature(end) + " K")
+disp("Maximum Wall Temperature: " + max(wallTemperature) + " K")
+disp("Maximum Internal Temperature: " + max(internalTemperature) + " K")
+disp("Maximum Nose Temperature: " + max(noseTemperature) + " K")

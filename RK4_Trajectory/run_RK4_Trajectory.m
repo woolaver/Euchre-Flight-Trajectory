@@ -18,7 +18,9 @@ x_init = 0;
 
 state0 = [V_init; launch_angle; height_init; x_init];
 
-[t, state, usefulData] = RK4_3DoF(state0, vehicleProperties);
+tempOffset = 0;
+
+[t, state, usefulData] = RK4_3DoF(state0, vehicleProperties, tempOffset);
 
 %sometimes final row will have NaN's due to certain values going
 %negative or something, if this happens just remove the last row
@@ -101,22 +103,22 @@ plot(t, rad2deg(usefulData(1, :)), 'LineWidth', 1, 'Color', 'Blue')
 plot(t(climbEndIndex), rad2deg(usefulData(1, climbEndIndex)), 'o', 'LineWidth', 3)
 plot(t(levelEndIndex), rad2deg(usefulData(1, levelEndIndex)), 'o', 'LineWidth', 3)
 plot(t(glideEndIndex), rad2deg(usefulData(1, glideEndIndex)), 'o', 'LineWidth', 3)
-legend('Angle of Attack', 'Climb End', 'Level End', 'Glide End')
+legend('Body Angle of Attack', 'Climb End', 'Level End', 'Glide End')
 xlabel('Time (s)')
-ylabel('Angle of Attack (deg)')
-title('Angle of Attack vs. Time')
+ylabel('Body Angle of Attack (deg)')
+title('Body Angle of Attack vs. Time')
 hold off
 
 figure()
 hold on
-plot(t, usefulData(2, :), 'LineWidth', 1, 'Color', 'Blue')
-plot(t(climbEndIndex), usefulData(2, climbEndIndex), 'o', 'LineWidth', 3)
-plot(t(levelEndIndex), usefulData(2, levelEndIndex), 'o', 'LineWidth', 3)
-plot(t(glideEndIndex), usefulData(2, glideEndIndex), 'o', 'LineWidth', 3)
-legend('CL', 'Climb End', 'Level End', 'Glide End')
+plot(t, rad2deg(usefulData(2, :)), 'LineWidth', 1, 'Color', 'Blue')
+plot(t(climbEndIndex), rad2deg(usefulData(2, climbEndIndex)), 'o', 'LineWidth', 3)
+plot(t(levelEndIndex), rad2deg(usefulData(2, levelEndIndex)), 'o', 'LineWidth', 3)
+plot(t(glideEndIndex), rad2deg(usefulData(2, glideEndIndex)), 'o', 'LineWidth', 3)
+legend('Fin Angle of Attack', 'Climb End', 'Level End', 'Glide End')
 xlabel('Time (s)')
-ylabel('CL')
-title('CL vs. Time')
+ylabel('Fin Angle of Attack (deg)')
+title('Fin Angle of Attack vs. Time')
 hold off
 
 figure()
@@ -125,10 +127,10 @@ plot(t, usefulData(3, :), 'LineWidth', 1, 'Color', 'Blue')
 plot(t(climbEndIndex), usefulData(3, climbEndIndex), 'o', 'LineWidth', 3)
 plot(t(levelEndIndex), usefulData(3, levelEndIndex), 'o', 'LineWidth', 3)
 plot(t(glideEndIndex), usefulData(3, glideEndIndex), 'o', 'LineWidth', 3)
-legend('CD', 'Climb End', 'Level End', 'Glide End')
+legend('CL', 'Climb End', 'Level End', 'Glide End')
 xlabel('Time (s)')
-ylabel('CD')
-title('CD vs. Time')
+ylabel('CL')
+title('CL vs. Time')
 hold off
 
 figure()
@@ -137,10 +139,10 @@ plot(t, usefulData(4, :), 'LineWidth', 1, 'Color', 'Blue')
 plot(t(climbEndIndex), usefulData(4, climbEndIndex), 'o', 'LineWidth', 3)
 plot(t(levelEndIndex), usefulData(4, levelEndIndex), 'o', 'LineWidth', 3)
 plot(t(glideEndIndex), usefulData(4, glideEndIndex), 'o', 'LineWidth', 3)
-legend('Density', 'Climb End', 'Level End', 'Glide End')
+legend('CD', 'Climb End', 'Level End', 'Glide End')
 xlabel('Time (s)')
-ylabel('Density (kg/m^3)')
-title('Density vs. Time')
+ylabel('CD')
+title('CD vs. Time')
 hold off
 
 figure()
@@ -149,10 +151,10 @@ plot(t, usefulData(5, :), 'LineWidth', 1, 'Color', 'Blue')
 plot(t(climbEndIndex), usefulData(5, climbEndIndex), 'o', 'LineWidth', 3)
 plot(t(levelEndIndex), usefulData(5, levelEndIndex), 'o', 'LineWidth', 3)
 plot(t(glideEndIndex), usefulData(5, glideEndIndex), 'o', 'LineWidth', 3)
-legend('Mach Number', 'Climb End', 'Level End', 'Glide End')
+legend('Density', 'Climb End', 'Level End', 'Glide End')
 xlabel('Time (s)')
-ylabel('Mach Number')
-title('Mach Number vs. Time')
+ylabel('Density (kg/m^3)')
+title('Density vs. Time')
 hold off
 
 figure()
@@ -161,10 +163,10 @@ plot(t, usefulData(6, :), 'LineWidth', 1, 'Color', 'Blue')
 plot(t(climbEndIndex), usefulData(6, climbEndIndex), 'o', 'LineWidth', 3)
 plot(t(levelEndIndex), usefulData(6, levelEndIndex), 'o', 'LineWidth', 3)
 plot(t(glideEndIndex), usefulData(6, glideEndIndex), 'o', 'LineWidth', 3)
-legend('Wall Temperature', 'Climb End', 'Level End', 'Glide End')
+legend('Mach Number', 'Climb End', 'Level End', 'Glide End')
 xlabel('Time (s)')
-ylabel('Wall Temperature (K)')
-title('Wall Temperature vs. Time')
+ylabel('Mach Number')
+title('Mach Number vs. Time')
 hold off
 
 figure()
@@ -173,10 +175,10 @@ plot(t, usefulData(7, :), 'LineWidth', 1, 'Color', 'Blue')
 plot(t(climbEndIndex), usefulData(7, climbEndIndex), 'o', 'LineWidth', 3)
 plot(t(levelEndIndex), usefulData(7, levelEndIndex), 'o', 'LineWidth', 3)
 plot(t(glideEndIndex), usefulData(7, glideEndIndex), 'o', 'LineWidth', 3)
-legend('Internal Temperature', 'Climb End', 'Level End', 'Glide End')
+legend('Wall Temperature', 'Climb End', 'Level End', 'Glide End')
 xlabel('Time (s)')
-ylabel('Internal Temperature (K)')
-title('Internal Temperature vs. Time')
+ylabel('Wall Temperature (K)')
+title('Wall Temperature vs. Time')
 hold off
 
 figure()
@@ -185,6 +187,18 @@ plot(t, usefulData(8, :), 'LineWidth', 1, 'Color', 'Blue')
 plot(t(climbEndIndex), usefulData(8, climbEndIndex), 'o', 'LineWidth', 3)
 plot(t(levelEndIndex), usefulData(8, levelEndIndex), 'o', 'LineWidth', 3)
 plot(t(glideEndIndex), usefulData(8, glideEndIndex), 'o', 'LineWidth', 3)
+legend('Internal Temperature', 'Climb End', 'Level End', 'Glide End')
+xlabel('Time (s)')
+ylabel('Internal Temperature (K)')
+title('Internal Temperature vs. Time')
+hold off
+
+figure()
+hold on
+plot(t, usefulData(9, :), 'LineWidth', 1, 'Color', 'Blue')
+plot(t(climbEndIndex), usefulData(9, climbEndIndex), 'o', 'LineWidth', 3)
+plot(t(levelEndIndex), usefulData(9, levelEndIndex), 'o', 'LineWidth', 3)
+plot(t(glideEndIndex), usefulData(9, glideEndIndex), 'o', 'LineWidth', 3)
 legend('Nose Temperature', 'Climb End', 'Level End', 'Glide End')
 xlabel('Time (s)')
 ylabel('Nose Temperature (K)')
@@ -195,10 +209,10 @@ disp("Final Results: ")
 disp("Total Time: " + t(end) + " s")
 disp("Total Distance: " + state(4, end) + " m")
 disp("Maximum Height: " + max(state(3, :)) + " m")
-disp("Landing Mach Number: " + usefulData(5, end))
-disp("Maximum Wall Temperature: " + max(usefulData(6, :)) + " K")
-disp("Maximum Internal Temperature: " + max(usefulData(7, :)) + " K")
-disp("Maximum Nose Temperature: " + max(usefulData(8, :)) + " K")
+disp("Landing Mach Number: " + usefulData(6, end))
+disp("Maximum Wall Temperature: " + max(usefulData(7, :)) + " K")
+disp("Maximum Internal Temperature: " + max(usefulData(8, :)) + " K")
+disp("Maximum Nose Temperature: " + max(usefulData(9, :)) + " K")
 
 Trajectory_Save_File = vehicleProperties.Trajectory_Save_File;
 
@@ -206,7 +220,7 @@ saveArray = [t' state' usefulData'];
 
 saveTable = array2table(saveArray, 'VariableNames', {'Time', ...
     'Velocity', 'FlightPathAngle', 'Height', ...
-    'Distance', 'AngleOfAttack', 'CL', 'CD', ...
+    'Distance', 'BodyAngleOfAttack', 'FinAngleOfAttack', 'CL', 'CD', ...
     'Density', 'Mach Number', 'WallTemperature', 'InternalTemperature', 'NoseTemperature'});
 
 writetable(saveTable, Trajectory_Save_File);
