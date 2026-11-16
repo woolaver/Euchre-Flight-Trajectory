@@ -5,14 +5,17 @@ function [a,ok] = tangent_wedge(minf,h,theta)
     [rho,p,T] = stdatmfull(h);
     try
         [p2op1, t2op1, rho2op1, ~, M2] = tbm(minf, theta);
-    catch
-        ok=false;
+    catch ME
+            ok = false; a = struct(); 
+            % fprintf('tbm failed: th=%.2f deg, M=%.2f -> %s\n', rad2deg(theta), minf, ME.message);
+            return
+            
     end
     a.p = p*p2op1;
     a.rho = rho*rho2op1;
     a.T = T*t2op1;
     a.M = M2;
-    a.ue = M2/sqrt(y*R*a.T);
+    a.ue = M2*sqrt(y*R*a.T);
 
 
 
