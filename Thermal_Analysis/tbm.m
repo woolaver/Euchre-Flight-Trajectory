@@ -9,7 +9,9 @@ function [p2op1, t2op1, rho2op1, cp, M2] = tbm(M1, t)
 %  M2    : post-shock Mach number
 
 % solve for beta
-b = fsolve(@(b) rel(t, b, M1), 45*pi/180, optimset('display', 'off'));
+    b0 = asin(1/M1) + t;
+  [b, ~, flag] = fsolve(@(b) rel(t,b,M1), b0, optimset('display','off'));
+  if flag <= 0 || b <= asin(1/M1) || ~isreal(b), error('detached'); end
 
 % g = gamma = specific heat ratio
 g = 1.4;
