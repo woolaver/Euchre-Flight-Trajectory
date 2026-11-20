@@ -8,8 +8,7 @@ function [q_an] = cone_heating(stlFile, alpha, alt,minf,twall)
 %   kval matrix for each layer
 %   thickness matrix of layers
 %Outputs:
-%   t_n nose cone temp over time
-%   t_i structre temp over time
+%   q_an heatflux into nose
 
 %constant
 r=.01; %nose cone radius

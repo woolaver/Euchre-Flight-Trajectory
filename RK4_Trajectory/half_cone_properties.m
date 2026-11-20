@@ -66,4 +66,5 @@ function vehicleProperties = half_cone_properties()
     vehicleProperties.fin_width = .1; %m, assuming rectangular planform
     vehicleProperties.cg_x_location = vehicleProperties.length*.5; %estimating cg at half length
     vehicleProperties.cp_x_location = vehicleProperties.length*.55; %estimating cp at .55 length, later on this should change with angle of attack but fine for testing rn
+    vehicleProperties.fin_volume = .0001565;
 end
