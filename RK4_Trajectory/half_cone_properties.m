@@ -15,7 +15,7 @@ function vehicleProperties = half_cone_properties()
     vehicleProperties.Trajectory_Save_File = "Half_Cone_Trajectory.csv";
     
     %dimensions
-    vehicleProperties.Sref = .56; %m^2
+    vehicleProperties.Sref = .52; %m^2
     vehicleProperties.length = 1.919; %m
     vehicleProperties.height = .189; %m, height is from center of vehicle to top point (radius for perfectly circular cross section)
     vehicleProperties.A = 1.252; %m^2, total surface area
