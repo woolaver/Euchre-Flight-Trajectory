@@ -55,6 +55,7 @@ function vehicleProperties = half_cone_properties()
     vehicleProperties.emissivity_nose = .23; %Tungsten estimate
     vehicleProperties.D_nose = .02; %m^2, circular esimtate from R_nose
     vehicleProperties.T_nose = 298; %K, initial nose temperature, room temperature
+    vehicleProperties.nose_STL = 'csv_files/nosecone.STL';
 
     %fin properties
     vehicleProperties.fin_x_location = .4820; %1/4 body length from the nose

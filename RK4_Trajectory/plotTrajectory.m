@@ -6,7 +6,7 @@ close all
 
 vehicleProperties = half_cone_properties();
 
-trajectoryData = readtable('Half_Cone_Trajectory_1.csv');
+trajectoryData = readtable('Half_Cone_Trajectory.csv');
 
 time = trajectoryData.Time;
 velocity = trajectoryData.Velocity;

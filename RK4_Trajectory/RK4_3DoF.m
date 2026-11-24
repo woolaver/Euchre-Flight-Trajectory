@@ -92,6 +92,7 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties, tempOffset
         L = 1/2*rho*state(1, i)^2*Sref*CL;
 
         [Fx, Fy, Q_conv_rate] = refTempMethod(length, height, state(3, i), Mach, alpha, Tw);
+        %Q_conv_nose_rate = cone_heating(vehicleProperties.nose_STL, alpha, state(3, i), Mach, T_nose, vehicleProperties);
         Q_conv_nose_rate = fayRiddellMethod(vehicleProperties, Mach, state(3, i), T_nose);
 
         if(isnan(Fx) || isnan(Fy) || isnan(Q_conv_rate))
@@ -227,14 +228,15 @@ function [t, state, usefulData] = RK4_3DoF(state0, vehicleProperties, tempOffset
 
             [trimDrag, trimLift, alpha_fin] = calcTrimDrag(vehicleProperties, alpha, L, D, state(3, i), Mach);
             
-            %L = L + trimLift;
-            %D = D + trimDrag;
+            L = L + trimLift;
+            D = D + trimDrag;
         else
             [L, D, alpha, alpha_fin] = findAlphaReq(vehicleProperties, L_req, Mach, state(3, i));
         end
 
         [Fx, Fy, Q_conv_rate] = refTempMethod(length, height, state(3, i), Mach, alpha, Tw);
         Q_conv_nose_rate = fayRiddellMethod(vehicleProperties, Mach, state(3, i), T_nose);
+        %Q_conv_nose_rate = cone_heating(vehicleProperties.nose_STL, alpha, state(3, i), Mach, T_nose, vehicleProperties);
 
         D = D + Fx;
         L = L + Fy;

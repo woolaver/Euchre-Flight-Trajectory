@@ -1,4 +1,4 @@
-function [q_an] = cone_heating(stlFile, alpha, alt,minf,twall)
+function [q_an] = cone_heating(stlFile, alpha, alt, minf, twall, vehicleProperties)
 %cone heating from stl file of nosecone assuming that nose cone can be
 %treated as a lumped system and doesnt use any dissasoiation for the
 %tangent wedge part
@@ -40,7 +40,7 @@ vinf = [0, -sin(alpha), -cos(alpha)];
 theta = asin(n * vinf');        %nfx1 this is dot product between normals and the velocity vector to find theta 
 q = zeros(size(theta)); %this is a matrix of all the q's
 yn = zeros(size(theta));
-qfr = fayRiddellMethod(r, minf, alt, twall);
+qfr = fayRiddellMethod(vehicleProperties, minf, alt, twall);
 for j = 1:size(theta,1)
 
     if theta(j)>deg2rad(80)  %basically if the wall is flat, use fayriddel to get
